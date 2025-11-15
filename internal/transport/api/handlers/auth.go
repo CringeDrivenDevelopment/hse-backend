@@ -7,6 +7,7 @@ import (
 	"backend/pkg/utils"
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/jackc/pgx/v5"
@@ -35,32 +36,34 @@ func NewAuth(userService *service.User, authService *service.Auth, logger *zap.L
 
 // login - Получить токен для взаимодействия. Нуждается в Raw строке из Telegram Mini App. Действует 1 час
 func (h *Auth) login(ctx context.Context, input *dto.AuthInputStruct) (*dto.AuthOutputStruct, error) {
+	h.logger.Info("login: " + input.Body.Raw)
+
 	id, err := h.authService.ParseInitData(input.Body.Raw)
 	if err != nil {
-		h.logger.Warn("login error", zap.Error(err))
+		h.logger.Warn(fmt.Sprintf("login error: initdata - %s, error - %s", input.Body.Raw, err.Error()))
 
-		return nil, utils.Convert(err)
+		return nil, utils.Convert(err, h.logger)
 	}
 
 	if err := h.userService.GetByID(ctx, id); err != nil {
 		if !errors.Is(err, pgx.ErrNoRows) {
-			h.logger.Error("login error", zap.Error(err))
+			h.logger.Warn(fmt.Sprintf("login error: initdata - %s, error - %s", input.Body.Raw, err.Error()))
 
-			return nil, utils.Convert(err)
+			return nil, utils.Convert(err, h.logger)
 		}
 
 		if err := h.userService.Create(ctx, id); err != nil {
-			h.logger.Error("login error", zap.Error(err))
+			h.logger.Warn(fmt.Sprintf("login error: initdata - %s, error - %s", input.Body.Raw, err.Error()))
 
-			return nil, utils.Convert(err)
+			return nil, utils.Convert(err, h.logger)
 		}
 	}
 
 	token, err := h.authService.GenerateToken(id)
 	if err != nil {
-		h.logger.Error("login error", zap.Error(err))
+		h.logger.Warn(fmt.Sprintf("login error: initdata - %s, error - %s", input.Body.Raw, err.Error()))
 
-		return nil, utils.Convert(err)
+		return nil, utils.Convert(err, h.logger)
 	}
 
 	tokenData := dto.Token{

@@ -4,6 +4,7 @@ import (
 	"backend/internal/infra/queries"
 	"backend/internal/interfaces"
 	"backend/internal/transport/api/dto"
+	"backend/pkg/spotify"
 	"backend/pkg/utils"
 	"backend/pkg/youtube"
 	"context"
@@ -18,11 +19,11 @@ type Track struct {
 	pool *pgxpool.Pool
 
 	youtube interfaces.SearchAPI
-	// spotify SearchAPI
+	spotify interfaces.SearchAPI
 }
 
-func NewTrack(pool *pgxpool.Pool, ytApi *youtube.API) *Track {
-	return &Track{pool: pool, youtube: ytApi}
+func NewTrack(pool *pgxpool.Pool, ytApi *youtube.API, spotify *spotify.API) *Track {
+	return &Track{pool: pool, youtube: ytApi, spotify: spotify}
 }
 
 /*
@@ -32,8 +33,19 @@ Search - метод для поиска треков на какой-либо и
 Search(ctx context.Context, query string, userId int64) ([]dto.Track, error)
 Изменилась, из-за поддержки множества площадок, а так же, из-за ненадобности получения списка плейлистов для трека
 */
-func (s *Track) Search(ctx context.Context, query string) ([]dto.Track, error) {
-	tracks, err := s.youtube.Search(ctx, query)
+func (s *Track) Search(ctx context.Context, platform, query string) ([]dto.Track, error) {
+	var tracks []dto.Track
+	var err error
+
+	switch platform {
+	case string(queries.PlaylistTypeYoutube):
+		tracks, err = s.youtube.Search(ctx, query)
+	case string(queries.PlaylistTypeSpotify):
+		tracks, err = s.spotify.Search(ctx, query)
+	default:
+		err = utils.ErrUnknownPlatform
+	}
+
 	if err != nil {
 		return nil, err
 	}

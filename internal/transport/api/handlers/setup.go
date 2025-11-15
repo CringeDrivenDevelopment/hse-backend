@@ -87,7 +87,7 @@ func (h *Track) setup(router huma.API, auth func(ctx huma.Context, next func(ctx
 			"tracks",
 		},
 		Summary:     "Search",
-		Description: "Найти трек по запросу. Поиск по Youtube Music",
+		Description: "Найти трек по запросу. Поиск по Youtube Music / Spotify",
 		Middlewares: huma.Middlewares{auth},
 		Security: []map[string][]string{
 			{

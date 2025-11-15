@@ -2,17 +2,22 @@
 
 version: '3'
 
-vars:
-  GREETING: Hello, World!
-
 tasks:
+  test:
+    cmds:
+      - go test -v ./...
   lint:
     cmds:
       - golangci-lint run ./...
   sqlc:
     cmds:
       - sqlc generate
-  default:
+  initdata:
     cmds:
-      - echo "{{.GREETING}}"
-    silent: true
+      - ./initdata.py
+  dev-env-up:
+    cmds:
+      - docker compose -f dev-compose.yml up -d
+  dev-env-down:
+    cmds:
+      - docker compose -f dev-compose.yml down

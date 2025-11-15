@@ -37,7 +37,7 @@ type PermissionService interface {
 }
 
 type TrackService interface {
-	Search(ctx context.Context, query string) ([]dto.Track, error)
+	Search(ctx context.Context, platform, query string) ([]dto.Track, error)
 	GetById(ctx context.Context, id string) (dto.Track, error)
 	Approve(ctx context.Context, playlistId string, trackId string, userId int64) error
 	Decline(ctx context.Context, playlistId string, trackId string, userId int64) error

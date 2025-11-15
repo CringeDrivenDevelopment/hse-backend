@@ -5,6 +5,7 @@ import (
 	"backend/internal/service"
 	"backend/internal/transport/api/handlers"
 	"backend/internal/transport/api/middlewares"
+	"backend/pkg/spotify"
 	"backend/pkg/youtube"
 
 	"go.uber.org/fx"
@@ -14,6 +15,7 @@ func main() {
 	// TODO: log db requests
 	// TODO: add otel
 	// TODO: add image proxy, DL
+	// TODO: process errors like .Error(), if code is 500 - print stacktrace
 
 	fx.New(
 		fx.Provide(
@@ -31,6 +33,7 @@ func main() {
 			infra.NewConfig,
 			infra.NewPostgresConnection,
 			youtube.New,
+			spotify.New,
 			service.NewAuth,
 			service.NewPermission,
 			service.NewPlaylist,
@@ -38,9 +41,7 @@ func main() {
 			service.NewUser,
 		),
 		fx.Invoke(func(auth *handlers.Auth, track *handlers.Track, playlist *handlers.Playlist) {
-			// need echo and huma to start the api
-
-			// need each of controllers, to register them, maybe i'll use hooks
+			// need each of controllers, to register them
 
 			// no need to call infra, apis and services, they're deps, started automatically
 		}),

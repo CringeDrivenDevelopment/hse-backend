@@ -14,7 +14,10 @@ tasks:
       - sqlc generate
   initdata:
     cmds:
-      - ./initdata.py
+      - ./tests/initdata.py
+  swagger:
+    cmds:
+      - swag init -g cmd/main.go
   dev-env-up:
     cmds:
       - docker compose -f dev-compose.yml up -d

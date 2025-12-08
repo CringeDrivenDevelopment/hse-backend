@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"backend/internal/infra/queries"
+	"backend/internal/domain/queries"
 	"backend/internal/transport/bot/utils"
 	"errors"
 	"strconv"

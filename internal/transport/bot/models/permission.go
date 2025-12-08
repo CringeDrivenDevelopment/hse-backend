@@ -1,14 +1,14 @@
 package models
 
 import (
-	"backend/internal/infra/queries"
+	"backend/internal/domain/entity"
 
 	"github.com/gotd/td/tg"
 )
 
 type ParticipantData struct {
-	PrevRole queries.PlaylistRole
-	NewRole  queries.PlaylistRole
+	PrevRole entity.PlaylistRole
+	NewRole  entity.PlaylistRole
 	UserID   int64
 	ChatID   int64
 	ActorID  int64

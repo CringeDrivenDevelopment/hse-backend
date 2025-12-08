@@ -1,7 +1,7 @@
 package interfaces
 
 import (
-	"backend/internal/infra/queries"
+	"backend/internal/domain/entity"
 	"backend/internal/transport/api/dto"
 	"backend/internal/transport/bot/models"
 	"context"
@@ -19,7 +19,7 @@ type AuthService interface {
 }
 
 type PlaylistService interface {
-	Create(ctx context.Context, title string, playlistType queries.PlaylistType, telegramId int64) (dto.Playlist, error)
+	Create(ctx context.Context, title string, playlistType entity.PlaylistType, telegramId int64) (dto.Playlist, error)
 	GetByGroup(ctx context.Context, telegramId int64) (dto.Playlist, error)
 	GetById(ctx context.Context, playlistId string, userId int64) (dto.Playlist, error)
 	GetAll(ctx context.Context, userId int64) ([]dto.Playlist, error)
@@ -29,11 +29,11 @@ type PlaylistService interface {
 }
 
 type PermissionService interface {
-	Add(ctx context.Context, role queries.PlaylistRole, playlist string, userId int64) error
+	Add(ctx context.Context, role entity.PlaylistRole, playlist string, userId int64) error
 	AddGroup(ctx context.Context, playlist string, users []models.ParticipantData) error
 	Remove(ctx context.Context, playlist string, userId int64) error
-	Edit(ctx context.Context, role queries.PlaylistRole, playlist string, userId int64) error
-	Get(ctx context.Context, userId int64, role queries.PlaylistRole) (string, error)
+	Edit(ctx context.Context, role entity.PlaylistRole, playlist string, userId int64) error
+	Get(ctx context.Context, userId int64, role entity.PlaylistRole) (string, error)
 }
 
 type TrackService interface {

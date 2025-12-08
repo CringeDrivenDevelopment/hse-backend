@@ -1,7 +1,7 @@
 package service
 
 import (
-	"backend/internal/infra/queries"
+	"backend/internal/domain/entity"
 	"backend/internal/transport/api/dto"
 	"backend/pkg/utils"
 	"context"
@@ -18,11 +18,11 @@ func NewPlaylist(pool *pgxpool.Pool) *Playlist {
 	return &Playlist{pool: pool}
 }
 
-func (s *Playlist) Create(ctx context.Context, title string, playlistType queries.PlaylistType, telegramId int64) (dto.Playlist, error) {
+func (s *Playlist) Create(ctx context.Context, title string, playlistType entity.PlaylistType, telegramId int64) (dto.Playlist, error) {
 	id := ulid.Make().String()
 
-	err := utils.ExecInTx(ctx, s.pool, func(tq *queries.Queries) error {
-		return tq.CreatePlaylist(ctx, queries.CreatePlaylistParams{
+	err := utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
+		return tq.CreatePlaylist(ctx, entity.CreatePlaylistParams{
 			ID:            id,
 			Title:         title,
 			Thumbnail:     "",
@@ -45,7 +45,7 @@ func (s *Playlist) Create(ctx context.Context, title string, playlistType querie
 }
 
 func (s *Playlist) GetByGroup(ctx context.Context, telegramId int64) (dto.Playlist, error) {
-	rq := queries.New(s.pool)
+	rq := entity.New(s.pool)
 	playlist, err := rq.GetGroupPlaylist(ctx, telegramId)
 	if err != nil {
 		return dto.Playlist{}, err
@@ -87,8 +87,8 @@ func (s *Playlist) GetByGroup(ctx context.Context, telegramId int64) (dto.Playli
 }
 
 func (s *Playlist) GetById(ctx context.Context, playlistId string, userId int64) (dto.Playlist, error) {
-	rq := queries.New(s.pool)
-	playlist, err := rq.GetUserPlaylistById(ctx, queries.GetUserPlaylistByIdParams{
+	rq := entity.New(s.pool)
+	playlist, err := rq.GetUserPlaylistById(ctx, entity.GetUserPlaylistByIdParams{
 		PlaylistID: playlistId,
 		UserID:     userId,
 	})
@@ -132,7 +132,7 @@ func (s *Playlist) GetById(ctx context.Context, playlistId string, userId int64)
 }
 
 func (s *Playlist) GetAll(ctx context.Context, userId int64) ([]dto.Playlist, error) {
-	rq := queries.New(s.pool)
+	rq := entity.New(s.pool)
 	playlists, err := rq.GetUserPlaylists(ctx, userId)
 	if err != nil {
 		return nil, err
@@ -162,8 +162,8 @@ func (s *Playlist) GetAll(ctx context.Context, userId int64) ([]dto.Playlist, er
 }
 
 func (s *Playlist) Rename(ctx context.Context, playlistId, title string, userId int64) error {
-	rq := queries.New(s.pool)
-	playlist, err := rq.GetUserPlaylistById(ctx, queries.GetUserPlaylistByIdParams{
+	rq := entity.New(s.pool)
+	playlist, err := rq.GetUserPlaylistById(ctx, entity.GetUserPlaylistByIdParams{
 		PlaylistID: playlistId,
 		UserID:     userId,
 	})
@@ -173,8 +173,8 @@ func (s *Playlist) Rename(ctx context.Context, playlistId, title string, userId 
 
 	playlist.Title = title
 
-	return utils.ExecInTx(ctx, s.pool, func(tq *queries.Queries) error {
-		return tq.EditPlaylist(ctx, queries.EditPlaylistParams{
+	return utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
+		return tq.EditPlaylist(ctx, entity.EditPlaylistParams{
 			ID:    playlist.ID,
 			Title: playlist.Title,
 		})
@@ -182,8 +182,8 @@ func (s *Playlist) Rename(ctx context.Context, playlistId, title string, userId 
 }
 
 func (s *Playlist) UpdatePhoto(ctx context.Context, playlistId, thumbnail string, userId int64) error {
-	rq := queries.New(s.pool)
-	playlist, err := rq.GetUserPlaylistById(ctx, queries.GetUserPlaylistByIdParams{
+	rq := entity.New(s.pool)
+	playlist, err := rq.GetUserPlaylistById(ctx, entity.GetUserPlaylistByIdParams{
 		PlaylistID: playlistId,
 		UserID:     userId,
 	})
@@ -193,8 +193,8 @@ func (s *Playlist) UpdatePhoto(ctx context.Context, playlistId, thumbnail string
 
 	playlist.Thumbnail = thumbnail
 
-	return utils.ExecInTx(ctx, s.pool, func(tq *queries.Queries) error {
-		return tq.EditPlaylist(ctx, queries.EditPlaylistParams{
+	return utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
+		return tq.EditPlaylist(ctx, entity.EditPlaylistParams{
 			ID:        playlist.ID,
 			Thumbnail: playlist.Thumbnail,
 		})
@@ -202,7 +202,7 @@ func (s *Playlist) UpdatePhoto(ctx context.Context, playlistId, thumbnail string
 }
 
 func (s *Playlist) Delete(ctx context.Context, playlistId string) error {
-	return utils.ExecInTx(ctx, s.pool, func(tq *queries.Queries) error {
+	return utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
 		return tq.DeletePlaylist(ctx, playlistId)
 	})
 }

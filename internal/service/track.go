@@ -1,7 +1,7 @@
 package service
 
 import (
-	"backend/internal/infra/queries"
+	"backend/internal/domain/entity"
 	"backend/internal/interfaces"
 	"backend/internal/transport/api/dto"
 	"backend/pkg/spotify"
@@ -38,9 +38,9 @@ func (s *Track) Search(ctx context.Context, platform, query string) ([]dto.Track
 	var err error
 
 	switch platform {
-	case string(queries.PlaylistTypeYoutube):
+	case string(entity.PlaylistTypeYoutube):
 		tracks, err = s.youtube.Search(ctx, query)
-	case string(queries.PlaylistTypeSpotify):
+	case string(entity.PlaylistTypeSpotify):
 		tracks, err = s.spotify.Search(ctx, query)
 	default:
 		err = utils.ErrUnknownPlatform
@@ -50,13 +50,13 @@ func (s *Track) Search(ctx context.Context, platform, query string) ([]dto.Track
 		return nil, err
 	}
 
-	rq := queries.New(s.pool)
+	rq := entity.New(s.pool)
 
-	if err := utils.ExecInTx(ctx, s.pool, func(tq *queries.Queries) error {
+	if err := utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
 		for _, track := range tracks {
 			_, err := rq.GetTrackById(ctx, track.Id)
 			if errors.Is(err, pgx.ErrNoRows) {
-				err = tq.CreateTrack(ctx, queries.CreateTrackParams{
+				err = tq.CreateTrack(ctx, entity.CreateTrackParams{
 					ID:        track.Id,
 					Title:     track.Title,
 					Authors:   track.Authors,
@@ -83,7 +83,7 @@ func (s *Track) Search(ctx context.Context, platform, query string) ([]dto.Track
 }
 
 func (s *Track) GetById(ctx context.Context, id string) (dto.Track, error) {
-	rq := queries.New(s.pool)
+	rq := entity.New(s.pool)
 	track, err := rq.GetTrackById(ctx, id)
 	if err != nil {
 		return dto.Track{}, err
@@ -100,8 +100,8 @@ func (s *Track) GetById(ctx context.Context, id string) (dto.Track, error) {
 }
 
 func (s *Track) Approve(ctx context.Context, playlistId, trackId string, userId int64) error {
-	rq := queries.New(s.pool)
-	playlist, err := rq.GetUserPlaylistById(ctx, queries.GetUserPlaylistByIdParams{
+	rq := entity.New(s.pool)
+	playlist, err := rq.GetUserPlaylistById(ctx, entity.GetUserPlaylistByIdParams{
 		PlaylistID: playlistId,
 		UserID:     userId,
 	})
@@ -109,7 +109,7 @@ func (s *Track) Approve(ctx context.Context, playlistId, trackId string, userId 
 		return err
 	}
 
-	if playlist.Role != queries.PlaylistRoleOwner && playlist.Role != queries.PlaylistRoleModerator {
+	if playlist.Role != entity.PlaylistRoleOwner && playlist.Role != entity.PlaylistRoleModerator {
 		return utils.ErrNotEnoughPerms
 	}
 
@@ -121,8 +121,8 @@ func (s *Track) Approve(ctx context.Context, playlistId, trackId string, userId 
 		return pgx.ErrNoRows
 	}
 
-	if err := utils.ExecInTx(ctx, s.pool, func(tq *queries.Queries) error {
-		return tq.EditPlaylist(ctx, queries.EditPlaylistParams{
+	if err := utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
+		return tq.EditPlaylist(ctx, entity.EditPlaylistParams{
 			ID:            playlistId,
 			AllowedTracks: append(playlist.AllowedTracks, trackId),
 		})
@@ -134,8 +134,8 @@ func (s *Track) Approve(ctx context.Context, playlistId, trackId string, userId 
 }
 
 func (s *Track) Decline(ctx context.Context, playlistId, trackId string, userId int64) error {
-	rq := queries.New(s.pool)
-	playlist, err := rq.GetUserPlaylistById(ctx, queries.GetUserPlaylistByIdParams{
+	rq := entity.New(s.pool)
+	playlist, err := rq.GetUserPlaylistById(ctx, entity.GetUserPlaylistByIdParams{
 		PlaylistID: playlistId,
 		UserID:     userId,
 	})
@@ -143,7 +143,7 @@ func (s *Track) Decline(ctx context.Context, playlistId, trackId string, userId 
 		return err
 	}
 
-	if playlist.Role != queries.PlaylistRoleOwner && playlist.Role != queries.PlaylistRoleModerator {
+	if playlist.Role != entity.PlaylistRoleOwner && playlist.Role != entity.PlaylistRoleModerator {
 		return utils.ErrNotEnoughPerms
 	}
 
@@ -158,8 +158,8 @@ func (s *Track) Decline(ctx context.Context, playlistId, trackId string, userId 
 		}
 	}
 
-	if err := utils.ExecInTx(ctx, s.pool, func(tq *queries.Queries) error {
-		return tq.EditPlaylist(ctx, queries.EditPlaylistParams{
+	if err := utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
+		return tq.EditPlaylist(ctx, entity.EditPlaylistParams{
 			ID:            playlistId,
 			AllowedTracks: playlist.AllowedTracks,
 		})
@@ -171,8 +171,8 @@ func (s *Track) Decline(ctx context.Context, playlistId, trackId string, userId 
 }
 
 func (s *Track) Submit(ctx context.Context, playlistId, trackId string, userId int64) error {
-	rq := queries.New(s.pool)
-	playlist, err := rq.GetUserPlaylistById(ctx, queries.GetUserPlaylistByIdParams{
+	rq := entity.New(s.pool)
+	playlist, err := rq.GetUserPlaylistById(ctx, entity.GetUserPlaylistByIdParams{
 		PlaylistID: playlistId,
 		UserID:     userId,
 	})
@@ -186,17 +186,17 @@ func (s *Track) Submit(ctx context.Context, playlistId, trackId string, userId i
 
 	tracks := playlist.Tracks
 	allowedTracks := playlist.AllowedTracks
-	if (playlist.Role == queries.PlaylistRoleOwner || playlist.Role == queries.PlaylistRoleModerator) && !slices.Contains(allowedTracks, trackId) {
+	if (playlist.Role == entity.PlaylistRoleOwner || playlist.Role == entity.PlaylistRoleModerator) && !slices.Contains(allowedTracks, trackId) {
 		tracks = append(tracks, trackId)
 		allowedTracks = append(allowedTracks, trackId)
-	} else if !slices.Contains(tracks, trackId) && playlist.Role == queries.PlaylistRoleViewer {
+	} else if !slices.Contains(tracks, trackId) && playlist.Role == entity.PlaylistRoleViewer {
 		tracks = append(tracks, trackId)
 	} else {
 		return nil
 	}
 
-	if err := utils.ExecInTx(ctx, s.pool, func(tq *queries.Queries) error {
-		return tq.EditPlaylist(ctx, queries.EditPlaylistParams{
+	if err := utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
+		return tq.EditPlaylist(ctx, entity.EditPlaylistParams{
 			ID:            playlistId,
 			Tracks:        tracks,
 			AllowedTracks: allowedTracks,
@@ -209,8 +209,8 @@ func (s *Track) Submit(ctx context.Context, playlistId, trackId string, userId i
 }
 
 func (s *Track) Unapprove(ctx context.Context, playlistId, trackId string, userId int64) error {
-	rq := queries.New(s.pool)
-	playlist, err := rq.GetUserPlaylistById(ctx, queries.GetUserPlaylistByIdParams{
+	rq := entity.New(s.pool)
+	playlist, err := rq.GetUserPlaylistById(ctx, entity.GetUserPlaylistByIdParams{
 		PlaylistID: playlistId,
 		UserID:     userId,
 	})
@@ -218,7 +218,7 @@ func (s *Track) Unapprove(ctx context.Context, playlistId, trackId string, userI
 		return err
 	}
 
-	if playlist.Role != queries.PlaylistRoleOwner && playlist.Role != queries.PlaylistRoleModerator {
+	if playlist.Role != entity.PlaylistRoleOwner && playlist.Role != entity.PlaylistRoleModerator {
 		return utils.ErrNotEnoughPerms
 	}
 
@@ -233,8 +233,8 @@ func (s *Track) Unapprove(ctx context.Context, playlistId, trackId string, userI
 		}
 	}
 
-	if err := utils.ExecInTx(ctx, s.pool, func(tq *queries.Queries) error {
-		return tq.EditPlaylist(ctx, queries.EditPlaylistParams{
+	if err := utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
+		return tq.EditPlaylist(ctx, entity.EditPlaylistParams{
 			ID:            playlistId,
 			AllowedTracks: playlist.AllowedTracks,
 		})

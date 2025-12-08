@@ -1,7 +1,7 @@
 package service
 
 import (
-	"backend/internal/infra/queries"
+	"backend/internal/domain/entity"
 	"backend/pkg/utils"
 	"context"
 
@@ -17,12 +17,12 @@ func NewUser(pool *pgxpool.Pool) *User {
 }
 
 func (s *User) Create(ctx context.Context, id int64) error {
-	rq := queries.New(s.pool)
+	rq := entity.New(s.pool)
 	if _, err := rq.GetUserById(ctx, id); err == nil {
 		return nil
 	}
 
-	if err := utils.ExecInTx(ctx, s.pool, func(tq *queries.Queries) error {
+	if err := utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
 		return tq.CreateUser(ctx, id)
 	}); err != nil {
 		return err
@@ -32,7 +32,7 @@ func (s *User) Create(ctx context.Context, id int64) error {
 }
 
 func (s *User) GetByID(ctx context.Context, id int64) error {
-	rq := queries.New(s.pool)
+	rq := entity.New(s.pool)
 
 	_, err := rq.GetUserById(ctx, id)
 	if err != nil {

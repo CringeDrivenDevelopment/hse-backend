@@ -2,6 +2,7 @@ package service
 
 import (
 	"backend/internal/domain/entity"
+	"backend/internal/infra/repo"
 	"backend/internal/interfaces"
 	"backend/internal/transport/api/dto"
 	"backend/pkg/spotify"
@@ -16,14 +17,14 @@ import (
 )
 
 type Track struct {
-	pool *pgxpool.Pool
+	trackRepo *repo.TrackRepo
 
 	youtube interfaces.SearchAPI
 	spotify interfaces.SearchAPI
 }
 
-func NewTrack(pool *pgxpool.Pool, ytApi *youtube.API, spotify *spotify.API) *Track {
-	return &Track{pool: pool, youtube: ytApi, spotify: spotify}
+func NewTrack(trackRepo *repo.TrackRepo, ytApi *youtube.API, spotify *spotify.API) *Track {
+	return &Track{trackRepo: trackRepo, youtube: ytApi, spotify: spotify}
 }
 
 /*
@@ -50,32 +51,7 @@ func (s *Track) Search(ctx context.Context, platform, query string) ([]dto.Track
 		return nil, err
 	}
 
-	rq := entity.New(s.pool)
-
-	if err := utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
-		for _, track := range tracks {
-			_, err := rq.GetTrackById(ctx, track.Id)
-			if errors.Is(err, pgx.ErrNoRows) {
-				err = tq.CreateTrack(ctx, entity.CreateTrackParams{
-					ID:        track.Id,
-					Title:     track.Title,
-					Authors:   track.Authors,
-					Thumbnail: track.Thumbnail,
-					Length:    track.Length,
-					Explicit:  track.Explicit,
-				})
-				if err != nil {
-					return err
-				}
-			}
-
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	}); err != nil {
+	if err := s.trackRepo.AddBatch(ctx, tracks); err != nil {
 		return nil, err
 	}
 
@@ -83,8 +59,7 @@ func (s *Track) Search(ctx context.Context, platform, query string) ([]dto.Track
 }
 
 func (s *Track) GetById(ctx context.Context, id string) (dto.Track, error) {
-	rq := entity.New(s.pool)
-	track, err := rq.GetTrackById(ctx, id)
+	track, err := s.trackRepo.GetById(ctx, id)
 	if err != nil {
 		return dto.Track{}, err
 	}
@@ -121,11 +96,11 @@ func (s *Track) Approve(ctx context.Context, playlistId, trackId string, userId 
 		return pgx.ErrNoRows
 	}
 
-	if err := utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
-		return tq.EditPlaylist(ctx, entity.EditPlaylistParams{
-			ID:            playlistId,
-			AllowedTracks: append(playlist.AllowedTracks, trackId),
-		})
+	playlist.AllowedTracks = append(playlist.AllowedTracks, trackId)
+
+	if err := s.trackRepo.Update(ctx, entity.EditPlaylistParams{
+		ID:            playlistId,
+		AllowedTracks: playlist.AllowedTracks,
 	}); err != nil {
 		return err
 	}
@@ -158,11 +133,9 @@ func (s *Track) Decline(ctx context.Context, playlistId, trackId string, userId 
 		}
 	}
 
-	if err := utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
-		return tq.EditPlaylist(ctx, entity.EditPlaylistParams{
-			ID:            playlistId,
-			AllowedTracks: playlist.AllowedTracks,
-		})
+	if err := s.trackRepo.Update(ctx, entity.EditPlaylistParams{
+		ID:            playlistId,
+		AllowedTracks: playlist.AllowedTracks,
 	}); err != nil {
 		return err
 	}
@@ -195,12 +168,10 @@ func (s *Track) Submit(ctx context.Context, playlistId, trackId string, userId i
 		return nil
 	}
 
-	if err := utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
-		return tq.EditPlaylist(ctx, entity.EditPlaylistParams{
-			ID:            playlistId,
-			Tracks:        tracks,
-			AllowedTracks: allowedTracks,
-		})
+	if err := s.trackRepo.Update(ctx, entity.EditPlaylistParams{
+		ID:            playlistId,
+		Tracks:        tracks,
+		AllowedTracks: allowedTracks,
 	}); err != nil {
 		return err
 	}
@@ -233,11 +204,9 @@ func (s *Track) Unapprove(ctx context.Context, playlistId, trackId string, userI
 		}
 	}
 
-	if err := utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
-		return tq.EditPlaylist(ctx, entity.EditPlaylistParams{
-			ID:            playlistId,
-			AllowedTracks: playlist.AllowedTracks,
-		})
+	if err := s.trackRepo.Update(ctx, entity.EditPlaylistParams{
+		ID:            playlistId,
+		AllowedTracks: playlist.AllowedTracks,
 	}); err != nil {
 		return err
 	}

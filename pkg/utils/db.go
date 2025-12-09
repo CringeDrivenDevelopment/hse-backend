@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func ExecInTx(ctx context.Context, pool *pgxpool.Pool, action func(tx *entity.Queries) error) error {
+func ExecInTx(ctx context.Context, pool *pgxpool.Pool, action func(tq *entity.Queries) error) error {
 	tx, err := pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return err

@@ -1,43 +1,25 @@
 package service
 
 import (
-	"backend/internal/domain/entity"
-	"backend/pkg/utils"
+	"backend/internal/infra/repo"
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type User struct {
-	pool *pgxpool.Pool
+	repo *repo.UserRepo
 }
 
 func NewUser(pool *pgxpool.Pool) *User {
-	return &User{pool: pool}
+	return &User{repo: repo.NewUserRepo(pool)}
 }
 
 func (s *User) Create(ctx context.Context, id int64) error {
-	rq := entity.New(s.pool)
-	if _, err := rq.GetUserById(ctx, id); err == nil {
-		return nil
-	}
-
-	if err := utils.ExecInTx(ctx, s.pool, func(tq *entity.Queries) error {
-		return tq.CreateUser(ctx, id)
-	}); err != nil {
-		return err
-	}
-
-	return nil
+	return s.repo.CreateIfNotExists(ctx, id)
 }
 
 func (s *User) GetByID(ctx context.Context, id int64) error {
-	rq := entity.New(s.pool)
-
-	_, err := rq.GetUserById(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	_, err := s.repo.Exists(ctx, id)
+	return err
 }

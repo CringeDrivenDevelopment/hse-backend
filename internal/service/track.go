@@ -1,30 +1,31 @@
 package service
 
 import (
-	"backend/internal/domain/entity"
-	"backend/internal/infra/repo"
-	"backend/internal/interfaces"
-	"backend/internal/transport/api/dto"
-	"backend/pkg/spotify"
-	"backend/pkg/utils"
-	"backend/pkg/youtube"
-	"context"
-	"errors"
-	"slices"
+    "backend/internal/domain/entity"
+    "backend/internal/infra/repo"
+    "backend/internal/interfaces"
+    "backend/internal/transport/api/dto"
+    "backend/pkg/spotify"
+    "backend/pkg/utils"
+    "backend/pkg/youtube"
+    "context"
+    "errors"
+    "slices"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+    "github.com/jackc/pgx/v5"
+    "github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Track struct {
-	trackRepo *repo.TrackRepo
+    trackRepo    *repo.TrackRepo
+    playlistRepo *repo.PlaylistRepo
 
-	youtube interfaces.SearchAPI
-	spotify interfaces.SearchAPI
+    youtube interfaces.SearchAPI
+    spotify interfaces.SearchAPI
 }
 
-func NewTrack(trackRepo *repo.TrackRepo, ytApi *youtube.API, spotify *spotify.API) *Track {
-	return &Track{trackRepo: trackRepo, youtube: ytApi, spotify: spotify}
+func NewTrack(trackRepo *repo.TrackRepo, playlistRepo *repo.PlaylistRepo, ytApi *youtube.API, spotify *spotify.API) *Track {
+    return &Track{trackRepo: trackRepo, playlistRepo: playlistRepo, youtube: ytApi, spotify: spotify}
 }
 
 /*
@@ -75,11 +76,7 @@ func (s *Track) GetById(ctx context.Context, id string) (dto.Track, error) {
 }
 
 func (s *Track) Approve(ctx context.Context, playlistId, trackId string, userId int64) error {
-	rq := entity.New(s.pool)
-	playlist, err := rq.GetUserPlaylistById(ctx, entity.GetUserPlaylistByIdParams{
-		PlaylistID: playlistId,
-		UserID:     userId,
-	})
+    playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err
 	}
@@ -108,12 +105,9 @@ func (s *Track) Approve(ctx context.Context, playlistId, trackId string, userId 
 	return nil
 }
 
+
 func (s *Track) Decline(ctx context.Context, playlistId, trackId string, userId int64) error {
-	rq := entity.New(s.pool)
-	playlist, err := rq.GetUserPlaylistById(ctx, entity.GetUserPlaylistByIdParams{
-		PlaylistID: playlistId,
-		UserID:     userId,
-	})
+    playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err
 	}
@@ -143,17 +137,14 @@ func (s *Track) Decline(ctx context.Context, playlistId, trackId string, userId 
 	return nil
 }
 
+
 func (s *Track) Submit(ctx context.Context, playlistId, trackId string, userId int64) error {
-	rq := entity.New(s.pool)
-	playlist, err := rq.GetUserPlaylistById(ctx, entity.GetUserPlaylistByIdParams{
-		PlaylistID: playlistId,
-		UserID:     userId,
-	})
+    playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err
 	}
 
-	if _, err := rq.GetTrackById(ctx, trackId); err != nil {
+	if _, err := s.trackRepo.GetById(ctx, trackId); err != nil {
 		return err
 	}
 
@@ -179,12 +170,9 @@ func (s *Track) Submit(ctx context.Context, playlistId, trackId string, userId i
 	return nil
 }
 
+
 func (s *Track) Unapprove(ctx context.Context, playlistId, trackId string, userId int64) error {
-	rq := entity.New(s.pool)
-	playlist, err := rq.GetUserPlaylistById(ctx, entity.GetUserPlaylistByIdParams{
-		PlaylistID: playlistId,
-		UserID:     userId,
-	})
+    playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err
 	}

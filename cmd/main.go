@@ -1,14 +1,15 @@
 package main
 
 import (
-	"backend/internal/infra"
-	"backend/internal/service"
-	"backend/internal/transport/api/handlers"
-	"backend/internal/transport/api/middlewares"
-	"backend/pkg/spotify"
-	"backend/pkg/youtube"
+    "backend/internal/infra"
+    "backend/internal/repo"
+    "backend/internal/service"
+    "backend/internal/transport/api/handlers"
+    "backend/internal/transport/api/middlewares"
+    "backend/pkg/spotify"
+    "backend/pkg/youtube"
 
-	"go.uber.org/fx"
+    "go.uber.org/fx"
 )
 
 func main() {
@@ -32,6 +33,9 @@ func main() {
 			infra.NewLogger,
 			infra.NewConfig,
 			infra.NewPostgresConnection,
+			// repositories
+			repo.NewPlaylistRepo,
+			repo.NewTrackRepo,
 			youtube.New,
 			spotify.New,
 			service.NewAuth,

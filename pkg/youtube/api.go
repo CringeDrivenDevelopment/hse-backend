@@ -129,8 +129,6 @@ func (s *API) Search(ctx context.Context, query string) ([]dto.Track, error) {
 		return nil, err
 	}
 
-	println(string(respBytes))
-
 	var result SearchResponse
 	if err := sonic.Unmarshal(respBytes, &result); err != nil {
 		return nil, err

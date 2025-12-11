@@ -1,31 +1,29 @@
 package service
 
 import (
-    "backend/internal/domain/entity"
-    "backend/internal/infra/repo"
-    "backend/internal/interfaces"
-    "backend/internal/transport/api/dto"
-    "backend/pkg/spotify"
-    "backend/pkg/utils"
-    "backend/pkg/youtube"
-    "context"
-    "errors"
-    "slices"
+	"backend/internal/domain/entity"
+	"backend/internal/infra/repo"
+	"backend/internal/interfaces"
+	"backend/internal/transport/api/dto"
+	"backend/pkg/spotify"
+	"backend/pkg/utils"
+	"backend/pkg/youtube"
+	"context"
+	"slices"
 
-    "github.com/jackc/pgx/v5"
-    "github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
 )
 
 type Track struct {
-    trackRepo    *repo.TrackRepo
-    playlistRepo *repo.PlaylistRepo
+	trackRepo    *repo.TrackRepo
+	playlistRepo *repo.PlaylistRepo
 
-    youtube interfaces.SearchAPI
-    spotify interfaces.SearchAPI
+	youtube interfaces.SearchAPI
+	spotify interfaces.SearchAPI
 }
 
 func NewTrack(trackRepo *repo.TrackRepo, playlistRepo *repo.PlaylistRepo, ytApi *youtube.API, spotify *spotify.API) *Track {
-    return &Track{trackRepo: trackRepo, playlistRepo: playlistRepo, youtube: ytApi, spotify: spotify}
+	return &Track{trackRepo: trackRepo, playlistRepo: playlistRepo, youtube: ytApi, spotify: spotify}
 }
 
 /*
@@ -76,7 +74,7 @@ func (s *Track) GetById(ctx context.Context, id string) (dto.Track, error) {
 }
 
 func (s *Track) Approve(ctx context.Context, playlistId, trackId string, userId int64) error {
-    playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
+	playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err
 	}
@@ -105,9 +103,8 @@ func (s *Track) Approve(ctx context.Context, playlistId, trackId string, userId 
 	return nil
 }
 
-
 func (s *Track) Decline(ctx context.Context, playlistId, trackId string, userId int64) error {
-    playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
+	playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err
 	}
@@ -116,7 +113,7 @@ func (s *Track) Decline(ctx context.Context, playlistId, trackId string, userId 
 		return utils.ErrNotEnoughPerms
 	}
 
-	if slices.Contains(playlist.AllowedTracks, trackId) || !slices.Contains(playlist.Tracks, trackId) {
+	if !slices.Contains(playlist.Tracks, trackId) {
 		return pgx.ErrNoRows
 	}
 
@@ -137,9 +134,8 @@ func (s *Track) Decline(ctx context.Context, playlistId, trackId string, userId 
 	return nil
 }
 
-
 func (s *Track) Submit(ctx context.Context, playlistId, trackId string, userId int64) error {
-    playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
+	playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err
 	}
@@ -170,9 +166,8 @@ func (s *Track) Submit(ctx context.Context, playlistId, trackId string, userId i
 	return nil
 }
 
-
 func (s *Track) Unapprove(ctx context.Context, playlistId, trackId string, userId int64) error {
-    playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
+	playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err
 	}
@@ -181,7 +176,7 @@ func (s *Track) Unapprove(ctx context.Context, playlistId, trackId string, userI
 		return utils.ErrNotEnoughPerms
 	}
 
-	if !slices.Contains(playlist.AllowedTracks, trackId) || !slices.Contains(playlist.Tracks, trackId) {
+	if !slices.Contains(playlist.AllowedTracks, trackId) && !slices.Contains(playlist.Tracks, trackId) {
 		return pgx.ErrNoRows
 	}
 

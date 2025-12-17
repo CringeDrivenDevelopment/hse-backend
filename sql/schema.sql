@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS playlists (
     title TEXT NOT NULL,
     thumbnail TEXT NOT NULL,
     type playlist_type NOT NULL,
-    external_id TEXT NOT NULL,
     telegram_id BIGINT NOT NULL,
     tracks TEXT[] DEFAULT '{}',
     allowed_tracks TEXT[] DEFAULT '{}',

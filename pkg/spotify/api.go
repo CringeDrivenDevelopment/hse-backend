@@ -2,8 +2,8 @@ package spotify
 
 import (
 	"backend/internal/infra"
-	"backend/internal/transport/api/dto"
 	"context"
+	"os"
 
 	"github.com/zmb3/spotify/v2"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
@@ -13,6 +13,7 @@ import (
 
 type API struct {
 	client *spotify.Client
+	auth   *spotifyauth.Authenticator
 }
 
 func New(lc fx.Lifecycle, cfg *infra.Config) (*API, error) {
@@ -31,6 +32,16 @@ func New(lc fx.Lifecycle, cfg *infra.Config) (*API, error) {
 	httpClient := spotifyauth.New().Client(ctxWithCancel, token)
 	result := &API{
 		client: spotify.New(httpClient),
+		auth: spotifyauth.New(
+			spotifyauth.WithRedirectURL(os.Getenv("SPOTIFY_REDIRECT_URL")),
+			spotifyauth.WithScopes(
+				spotifyauth.ScopePlaylistModifyPublic,
+				spotifyauth.ScopePlaylistModifyPrivate,
+				spotifyauth.ScopePlaylistReadPrivate,
+			),
+			spotifyauth.WithClientID(os.Getenv("SPOTIFY_CLIENT_ID")),
+			spotifyauth.WithClientSecret(os.Getenv("SPOTIFY_CLIENT_SECRET")),
+		),
 	}
 
 	lc.Append(fx.Hook{
@@ -42,27 +53,6 @@ func New(lc fx.Lifecycle, cfg *infra.Config) (*API, error) {
 			return nil
 		},
 	})
-
-	return result, nil
-}
-
-func (s *API) Search(ctx context.Context, query string) ([]dto.Track, error) {
-	resp, err := s.client.Search(ctx, query, spotify.SearchTypeTrack)
-	if err != nil {
-		return nil, err
-	}
-
-	result := make([]dto.Track, len(resp.Tracks.Tracks))
-	for i, track := range resp.Tracks.Tracks {
-		result[i] = dto.Track{
-			Id:        track.ID.String(),
-			Title:     track.Name,
-			Authors:   getArtists(track.Artists),
-			Thumbnail: track.Album.Images[0].URL,
-			Explicit:  track.Explicit,
-			Length:    int32(track.Duration) / 1000,
-		}
-	}
 
 	return result, nil
 }

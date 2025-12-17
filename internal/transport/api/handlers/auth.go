@@ -38,7 +38,7 @@ func NewAuth(userService *service.User, authService *service.Auth, logger *zap.L
 func (h *Auth) login(ctx context.Context, input *dto.AuthInputStruct) (*dto.AuthOutputStruct, error) {
 	h.logger.Info("login: " + input.Body.Raw)
 
-	id, err := h.authService.ParseInitData(input.Body.Raw)
+	id, err := h.authService.ParseTelegramData(input.Body.Raw)
 	if err != nil {
 		h.logger.Warn(fmt.Sprintf("login error: initdata - %s, error - %s", input.Body.Raw, err.Error()))
 

@@ -70,6 +70,27 @@ func (h *Playlist) setup(router huma.API, auth func(ctx huma.Context, next func(
 			},
 		},
 	}, h.getAll)
+
+	huma.Register(router, huma.Operation{
+		OperationID: "playlist-export",
+		Path:        "/api/playlists/{id}/export",
+		Method:      http.MethodPost,
+		Errors: []int{
+			401,
+			500,
+		},
+		Tags: []string{
+			"playlist",
+		},
+		Summary:     "Export",
+		Description: "Экспортировать плейлист (можно в m4a из youtube и создать плейлист в spotify)",
+		Middlewares: huma.Middlewares{auth},
+		Security: []map[string][]string{
+			{
+				"jwt": []string{},
+			},
+		},
+	}, h.export)
 }
 
 func (h *Track) setup(router huma.API, auth func(ctx huma.Context, next func(ctx huma.Context))) {

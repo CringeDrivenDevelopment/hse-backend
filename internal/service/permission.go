@@ -1,9 +1,9 @@
 package service
 
 import (
+	"backend/internal/bot/dto"
 	"backend/internal/domain/entity"
 	"backend/internal/infra/repo"
-	"backend/internal/transport/bot/models"
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -21,7 +21,7 @@ func (s *PermissionService) Add(ctx context.Context, role entity.PlaylistRole, p
 	return s.repo.Add(ctx, role, playlist, userId)
 }
 
-func (s *PermissionService) AddGroup(ctx context.Context, playlist string, users []models.ParticipantData) error {
+func (s *PermissionService) AddGroup(ctx context.Context, playlist string, users []dto.Participant) error {
 	return s.repo.AddGroup(ctx, playlist, users)
 }
 

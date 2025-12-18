@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/internal/bot"
 	"backend/internal/infra"
 	"backend/internal/infra/repo"
 	"backend/internal/service"
@@ -75,7 +76,9 @@ func main() {
 			service.NewPlaylistService,
 			service.NewTrackService,
 			service.NewUserService,
+			service.NewParticipantService,
 		),
+		bot.Module,
 		fx.Invoke(func(auth *handlers.Auth, track *handlers.Track, playlist *handlers.Playlist) {
 			// need each of controllers, to register them
 

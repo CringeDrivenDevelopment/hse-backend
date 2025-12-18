@@ -1,14 +1,14 @@
 package repo
 
 import (
-    "backend/internal/domain/entity"
-    "backend/internal/transport/bot/models"
-    "backend/pkg/utils"
-    "context"
-    "errors"
+	"backend/internal/bot/dto"
+	"backend/internal/domain/entity"
+	"backend/pkg/utils"
+	"context"
+	"errors"
 
-    "github.com/jackc/pgx/v5"
-    "github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // PermissionRepo provides database operations for permission/role management.
@@ -37,23 +37,23 @@ func (r *PermissionRepo) Add(ctx context.Context, role entity.PlaylistRole, play
     })
 }
 
-func (r *PermissionRepo) AddGroup(ctx context.Context, playlist string, users []models.ParticipantData) error {
-    return utils.ExecInTx(ctx, r.pool, func(tq *entity.Queries) error {
-        for _, user := range users {
-            if _, err := r.rq.GetUserById(ctx, user.UserID); err != nil {
-                if !errors.Is(err, pgx.ErrNoRows) {
-                    return err
-                }
-                if err = tq.CreateUser(ctx, user.UserID); err != nil {
-                    return err
-                }
-            }
-            if err := tq.CreateRole(ctx, entity.CreateRoleParams{Role: user.NewRole, UserID: user.UserID, PlaylistID: playlist}); err != nil {
-                return err
-            }
-        }
-        return nil
-    })
+func (r *PermissionRepo) AddGroup(ctx context.Context, playlist string, users []dto.Participant) error {
+	return utils.ExecInTx(ctx, r.pool, func(tq *entity.Queries) error {
+		for _, user := range users {
+			if _, err := r.rq.GetUserById(ctx, user.UserID); err != nil {
+				if !errors.Is(err, pgx.ErrNoRows) {
+					return err
+				}
+				if err = tq.CreateUser(ctx, user.UserID); err != nil {
+					return err
+				}
+			}
+			if err := tq.CreateRole(ctx, entity.CreateRoleParams{Role: user.NewRole, UserID: user.UserID, PlaylistID: playlist}); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func (r *PermissionRepo) Remove(ctx context.Context, playlist string, userId int64) error {

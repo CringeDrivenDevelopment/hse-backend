@@ -2,12 +2,67 @@ package bot
 
 import (
 	appHandlers "backend/internal/bot/handlers"
+	"backend/internal/bot/services"
+	"backend/internal/infra"
 
 	"github.com/celestix/gotgproto"
 	"github.com/celestix/gotgproto/dispatcher/handlers"
+	"github.com/celestix/gotgproto/sessionMaker"
 	"github.com/celestix/gotgproto/types"
+	"github.com/gotd/td/telegram/dcs"
 	"github.com/gotd/td/tg"
+	"go.uber.org/fx"
+	"go.uber.org/zap"
+	"gorm.io/driver/sqlite"
 )
+
+var Module = fx.Options(
+	fx.Provide(
+		NewBotClient,
+		appHandlers.NewGroupHandler,
+		appHandlers.NewChatActionHandler,
+		appHandlers.NewStartHandler,
+		services.NewChatService,
+		services.NewParticipantService,
+	),
+	fx.Invoke(RegisterHandlers),
+)
+
+func NewBotClient(cfg *infra.Config, logger *zap.Logger) (*gotgproto.Client, error) {
+	var dcList dcs.List
+	if cfg.Debug {
+		dcList = dcs.Test()
+	} else {
+		dcList = dcs.Prod()
+	}
+
+	client, err := gotgproto.NewClient(
+		cfg.AppId,
+		cfg.AppHash,
+		gotgproto.ClientTypeBot(cfg.BotToken),
+		&gotgproto.ClientOpts{
+			DCList:           dcList,
+			DisableCopyright: true,
+			InMemory:         true,
+			Session:          sessionMaker.SqlSession(sqlite.Open("telegram/bot.db")),
+			Logger:           logger,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	self := client.Self
+	logger.Info("bot logged in", zap.String("username", self.Username))
+
+	go func() {
+		if err := client.Idle(); err != nil {
+			logger.Error("failed to start a bot", zap.Error(err))
+		}
+	}()
+
+	return client, nil
+}
 
 func RegisterHandlers(
 	client *gotgproto.Client,

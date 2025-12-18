@@ -3,6 +3,8 @@ package utils
 import (
 	"backend/internal/domain/entity"
 	"context"
+	"errors"
+	"github.com/gotd/td/tg"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -31,4 +33,17 @@ func ExecInTx(ctx context.Context, pool *pgxpool.Pool, action func(tq *entity.Qu
 	}
 
 	return nil
+}
+
+func GetChatID(peer tg.PeerClass) (int64, error) {
+	switch p := peer.(type) {
+	case *tg.PeerChannel:
+		return p.ChannelID, nil
+	case *tg.PeerChat:
+		return p.ChatID, nil
+	case *tg.PeerUser:
+		return p.UserID, nil
+	default:
+		return 0, errors.New("invalid peer type")
+	}
 }

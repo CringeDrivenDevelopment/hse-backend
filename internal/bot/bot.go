@@ -18,8 +18,14 @@ func RegisterHandlers(
 	client.Dispatcher.AddHandler(handlers.NewChatMemberUpdated(nil, groupHandler.HandleGroup))
 	client.Dispatcher.AddHandler(handlers.NewCommand("start", startHandler.HandleStart))
 	client.Dispatcher.AddHandler(handlers.NewMessage(func(msg *types.Message) bool {
-		_, okTitle := msg.Action.(*tg.MessageActionChatEditTitle)
-		// _, okPhoto := msg.Action.(*tg.MessageActionChatEditPhoto)
-		return okTitle // || okPhoto
+		switch msg.Action.(type) {
+		case *tg.MessageActionChatEditTitle,
+			*tg.MessageActionChatAddUser,
+			*tg.MessageActionChatDeleteUser,
+			*tg.MessageActionChatJoinedByLink:
+			return true
+		default:
+			return false
+		}
 	}, chatActionHandler.HandleChatAction))
 }

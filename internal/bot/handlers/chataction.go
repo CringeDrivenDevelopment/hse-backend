@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"backend/internal/interfaces"
+	"backend/pkg/utils"
 
 	"github.com/celestix/gotgproto/ext"
 	"github.com/gotd/td/tg"
@@ -13,14 +14,20 @@ import (
 )
 
 type ChatActionHandler struct {
-	playlistService interfaces.PlaylistService
-	logger          *zap.Logger
+	playlistService    interfaces.PlaylistService
+	participantService interfaces.ParticipantService
+	logger             *zap.Logger
 }
 
-func NewChatActionHandler(playlistService interfaces.PlaylistService, logger *zap.Logger) *ChatActionHandler {
+func NewChatActionHandler(
+	playlistService interfaces.PlaylistService,
+	participantService interfaces.ParticipantService,
+	logger *zap.Logger,
+) *ChatActionHandler {
 	return &ChatActionHandler{
-		playlistService: playlistService,
-		logger:          logger,
+		playlistService:    playlistService,
+		participantService: participantService,
+		logger:             logger,
 	}
 }
 
@@ -40,7 +47,7 @@ func (h *ChatActionHandler) HandleChatAction(ctx *ext.Context, update *ext.Updat
 		return nil
 	}
 
-	chatID, err := ctx.GetChatID()
+	chatID, err := utils.GetChatID(serviceMessage.PeerID)
 	if err != nil {
 		h.logger.Error("failed to get chat id", zap.Error(err))
 		return nil
@@ -53,6 +60,26 @@ func (h *ChatActionHandler) HandleChatAction(ctx *ext.Context, update *ext.Updat
 		err := h.handleTitleUpdate(ctx.Context, smResult.Title, chatID)
 		if err != nil {
 			h.logger.Error("failed to handle title update", zap.Error(err))
+		}
+	case *tg.MessageActionChatAddUser:
+		err = h.participantService.Add(ctx.Context, chatID, smResult.Users)
+		if err != nil {
+			h.logger.Error("failed to handle add user", zap.Error(err))
+		}
+	case *tg.MessageActionChatDeleteUser:
+		err = h.participantService.Remove(ctx.Context, chatID, smResult.UserID)
+		if err != nil {
+			h.logger.Error("failed to handle delete user", zap.Error(err))
+		}
+	case *tg.MessageActionChatJoinedByLink:
+		fromID, ok := serviceMessage.FromID.(*tg.PeerUser)
+		if !ok {
+			return errors.New("failed to handle joined by link")
+		}
+
+		err = h.participantService.Add(ctx.Context, chatID, []int64{fromID.UserID})
+		if err != nil {
+			h.logger.Error("failed to handle join by link user", zap.Error(err))
 		}
 	}
 

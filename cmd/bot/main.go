@@ -38,6 +38,7 @@ func main() {
 
 	playlistService := service.NewPlaylistService(db, logger)
 	permissionService := service.NewPermissionService(db, logger)
+	participantService := service.NewParticipantService(logger)
 
 	var dcList dcs.List
 	if cfg.Debug {
@@ -72,7 +73,7 @@ func main() {
 	partService := services.NewParticipantService()
 
 	groupHandler := handlers.NewGroupHandler(playlistService, permissionService, chatService, partService, client, logger)
-	chatActionHandler := handlers.NewChatActionHandler(playlistService, logger)
+	chatActionHandler := handlers.NewChatActionHandler(playlistService, participantService, logger)
 	startHandler := handlers.NewStartHandler(logger)
 
 	bot.RegisterHandlers(client, groupHandler, chatActionHandler, startHandler)

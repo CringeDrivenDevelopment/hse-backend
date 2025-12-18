@@ -47,3 +47,8 @@ type TrackService interface {
 	Submit(ctx context.Context, playlistId string, trackId string, userId int64) error
 	Unapprove(ctx context.Context, playlistId string, trackId string, userId int64) error
 }
+
+type ParticipantService interface {
+	Add(ctx context.Context, chatID int64, userIDs []int64) error
+	Remove(ctx context.Context, chatID int64, userID int64) error
+}

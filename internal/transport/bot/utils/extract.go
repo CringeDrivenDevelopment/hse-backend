@@ -1,26 +1,26 @@
 package utils
 
 import (
-	"backend/internal/domain/queries"
+	"backend/internal/domain/entity"
 	"backend/internal/transport/bot/models"
 
 	"github.com/gotd/td/tg"
 )
 
 func ExtractChannelData(update *tg.UpdateChannelParticipant) models.ParticipantData {
-	var newRole queries.PlaylistRole
-	var prevRole queries.PlaylistRole
+	var newRole entity.PlaylistRole
+	var prevRole entity.PlaylistRole
 
 	if update.PrevParticipant != nil {
 		switch update.PrevParticipant.(type) {
 		case *tg.ChannelParticipant:
-			prevRole = queries.PlaylistRoleViewer
+			prevRole = entity.PlaylistRoleViewer
 		case *tg.ChannelParticipantAdmin:
-			prevRole = queries.PlaylistRoleModerator
+			prevRole = entity.PlaylistRoleModerator
 		case *tg.ChannelParticipantCreator:
-			prevRole = queries.PlaylistRoleOwner
+			prevRole = entity.PlaylistRoleOwner
 		case *tg.ChannelParticipantSelf:
-			prevRole = queries.PlaylistRoleViewer
+			prevRole = entity.PlaylistRoleViewer
 		default:
 			prevRole = ""
 		}
@@ -29,13 +29,13 @@ func ExtractChannelData(update *tg.UpdateChannelParticipant) models.ParticipantD
 	if update.NewParticipant != nil {
 		switch update.NewParticipant.(type) {
 		case *tg.ChannelParticipant:
-			newRole = queries.PlaylistRoleViewer
+			newRole = entity.PlaylistRoleViewer
 		case *tg.ChannelParticipantAdmin:
-			newRole = queries.PlaylistRoleModerator
+			newRole = entity.PlaylistRoleModerator
 		case *tg.ChannelParticipantCreator:
-			newRole = queries.PlaylistRoleOwner
+			newRole = entity.PlaylistRoleOwner
 		case *tg.ChannelParticipantSelf:
-			newRole = queries.PlaylistRoleViewer
+			newRole = entity.PlaylistRoleViewer
 		default:
 			newRole = ""
 		}
@@ -51,17 +51,17 @@ func ExtractChannelData(update *tg.UpdateChannelParticipant) models.ParticipantD
 }
 
 func ExtractChatData(update *tg.UpdateChatParticipant) models.ParticipantData {
-	var newRole queries.PlaylistRole
-	var prevRole queries.PlaylistRole
+	var newRole entity.PlaylistRole
+	var prevRole entity.PlaylistRole
 
 	if update.PrevParticipant != nil {
 		switch update.PrevParticipant.(type) {
 		case *tg.ChatParticipant:
-			prevRole = queries.PlaylistRoleViewer
+			prevRole = entity.PlaylistRoleViewer
 		case *tg.ChatParticipantAdmin:
-			prevRole = queries.PlaylistRoleModerator
+			prevRole = entity.PlaylistRoleModerator
 		case *tg.ChatParticipantCreator:
-			prevRole = queries.PlaylistRoleOwner
+			prevRole = entity.PlaylistRoleOwner
 		default:
 			prevRole = ""
 		}
@@ -70,11 +70,11 @@ func ExtractChatData(update *tg.UpdateChatParticipant) models.ParticipantData {
 	if update.NewParticipant != nil {
 		switch update.NewParticipant.(type) {
 		case *tg.ChatParticipant:
-			newRole = queries.PlaylistRoleViewer
+			newRole = entity.PlaylistRoleViewer
 		case *tg.ChatParticipantAdmin:
-			newRole = queries.PlaylistRoleModerator
+			newRole = entity.PlaylistRoleModerator
 		case *tg.ChatParticipantCreator:
-			newRole = queries.PlaylistRoleOwner
+			newRole = entity.PlaylistRoleOwner
 		default:
 			newRole = ""
 		}

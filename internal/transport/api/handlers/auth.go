@@ -22,7 +22,7 @@ type Auth struct {
 }
 
 // NewAuth - создать новый экземпляр обработчика
-func NewAuth(userService *service.User, authService *service.Auth, logger *zap.Logger, api huma.API) *Auth {
+func NewAuth(userService *service.UserService, authService *service.AuthService, logger *zap.Logger, api huma.API) *Auth {
 	result := &Auth{
 		userService: userService,
 		authService: authService,

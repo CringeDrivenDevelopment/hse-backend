@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"backend/internal/domain/queries"
+	"backend/internal/domain/entity"
 	"backend/internal/transport/bot/models"
 	"context"
 	"errors"
@@ -65,14 +65,14 @@ func iterateParticipants(client *gotgproto.Client, ctx context.Context, channel 
 	return &data, nil
 }
 
-func extractUserAndRole(participant tg.ChannelParticipantClass) (int64, queries.PlaylistRole) {
+func extractUserAndRole(participant tg.ChannelParticipantClass) (int64, entity.PlaylistRole) {
 	switch p := participant.(type) {
 	case *tg.ChannelParticipant:
-		return p.UserID, queries.PlaylistRoleViewer
+		return p.UserID, entity.PlaylistRoleViewer
 	case *tg.ChannelParticipantCreator:
-		return p.UserID, queries.PlaylistRoleOwner
+		return p.UserID, entity.PlaylistRoleOwner
 	case *tg.ChannelParticipantAdmin:
-		return p.UserID, queries.PlaylistRoleModerator
+		return p.UserID, entity.PlaylistRoleModerator
 	default:
 		return 0, ""
 	}

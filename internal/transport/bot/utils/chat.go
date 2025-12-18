@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"backend/internal/domain/queries"
+	"backend/internal/domain/entity"
 	"backend/internal/transport/bot/models"
 	"context"
 	"errors"
@@ -45,13 +45,13 @@ func GetChatInfo(client *gotgproto.Client, ctx context.Context, chatID, actorID 
 
 				if val.ID != actorID {
 					usersTemp = append(usersTemp, models.ParticipantData{
-						NewRole: queries.PlaylistRoleViewer,
+						NewRole: entity.PlaylistRoleViewer,
 						ChatID:  chatID,
 						UserID:  val.ID,
 					})
 				} else {
 					usersTemp = append(usersTemp, models.ParticipantData{
-						NewRole: queries.PlaylistRoleOwner,
+						NewRole: entity.PlaylistRoleOwner,
 						ChatID:  chatID,
 						UserID:  val.ID,
 					})

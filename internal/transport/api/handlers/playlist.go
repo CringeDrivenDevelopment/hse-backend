@@ -24,7 +24,7 @@ type Playlist struct {
 }
 
 // NewPlaylist - создать новый экземпляр обработчика
-func NewPlaylist(playlistService *service.Playlist, permissionService *service.Permission, logger *zap.Logger, api huma.API, authMiddleware *middlewares.Auth) *Playlist {
+func NewPlaylist(playlistService *service.PlaylistService, permissionService *service.PermissionService, logger *zap.Logger, api huma.API, authMiddleware *middlewares.Auth) *Playlist {
 	result := &Playlist{
 		playlistService:   playlistService,
 		permissionService: permissionService,
@@ -81,7 +81,7 @@ func (h *Playlist) getAll(ctx context.Context, _ *struct{}) (*dto.PlaylistsRespo
 }
 
 func (h *Playlist) export(ctx context.Context, input *struct {
-	SpotifyData string `header:"X-Spotify-Data" doc:"Spotify Auth data for logging into user's account"`
+	SpotifyData string `header:"X-Spotify-Data" doc:"Spotify AuthService data for logging into user's account"`
 	IsPublic    bool   `query:"is_public" doc:"Set to true if the playlist is public. Works only with spotify"`
 	Id          string `path:"id" minLength:"26" maxLength:"26" example:"01JZ35PYGP6HJA08H0NHYPBHWD" doc:"playlist id"`
 }) (*struct{}, error) {

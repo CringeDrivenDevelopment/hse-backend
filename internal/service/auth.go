@@ -16,16 +16,16 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type Auth struct {
+type AuthService struct {
 	secret   string
 	botToken string
 
 	expires time.Duration
 }
 
-// NewAuth - создать новый экземпляр сервиса авторизации
-func NewAuth(cfg *infra.Config) *Auth {
-	return &Auth{
+// NewAuthService - создать новый экземпляр сервиса авторизации
+func NewAuthService(cfg *infra.Config) *AuthService {
+	return &AuthService{
 		secret:   cfg.JwtSecret,
 		botToken: cfg.BotToken,
 		expires:  time.Hour,
@@ -33,7 +33,7 @@ func NewAuth(cfg *infra.Config) *Auth {
 }
 
 // VerifyToken - проверить токен на подлинность
-func (s *Auth) VerifyToken(authHeader string) (int64, error) {
+func (s *AuthService) VerifyToken(authHeader string) (int64, error) {
 	tokenStr := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
 	if tokenStr == "" {
 		return 0, utils.ErrInvalidToken
@@ -70,7 +70,7 @@ func (s *Auth) VerifyToken(authHeader string) (int64, error) {
 }
 
 // GenerateToken - создать новый JWT токен
-func (s *Auth) GenerateToken(userID int64) (string, error) {
+func (s *AuthService) GenerateToken(userID int64) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": strconv.FormatInt(userID, 10),
 		"iat": time.Now().Unix(),
@@ -82,7 +82,7 @@ func (s *Auth) GenerateToken(userID int64) (string, error) {
 }
 
 // ParseTelegramData - извлечь Telegram ID из Init Data Raw
-func (s *Auth) ParseTelegramData(initDataRaw string) (int64, error) {
+func (s *AuthService) ParseTelegramData(initDataRaw string) (int64, error) {
 	if err := initdata.Validate(initDataRaw, s.botToken, s.expires); err != nil {
 		return 0, utils.ErrInvalidInitData
 	}
@@ -109,7 +109,7 @@ func (s *Auth) ParseTelegramData(initDataRaw string) (int64, error) {
 
 // ParseSpotifyData - извлечь данные для входа в Spotify из строки в base64
 // TODO: USE HTTP ONLY COOKIE!!!!!
-func (s *Auth) ParseSpotifyData(spotifyAuthHeader string) (*oauth2.Token, error) {
+func (s *AuthService) ParseSpotifyData(spotifyAuthHeader string) (*oauth2.Token, error) {
 	decodedValue, err := base64.StdEncoding.DecodeString(spotifyAuthHeader)
 	if err != nil {
 		return nil, err

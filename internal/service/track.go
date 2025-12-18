@@ -14,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type Track struct {
+type TrackService struct {
 	trackRepo    *repo.TrackRepo
 	playlistRepo *repo.PlaylistRepo
 
@@ -22,8 +22,8 @@ type Track struct {
 	spotify interfaces.SearchAPI
 }
 
-func NewTrack(trackRepo *repo.TrackRepo, playlistRepo *repo.PlaylistRepo, ytApi *youtube.API, spotify *spotify.API) *Track {
-	return &Track{trackRepo: trackRepo, playlistRepo: playlistRepo, youtube: ytApi, spotify: spotify}
+func NewTrackService(trackRepo *repo.TrackRepo, playlistRepo *repo.PlaylistRepo, ytApi *youtube.API, spotify *spotify.API) *TrackService {
+	return &TrackService{trackRepo: trackRepo, playlistRepo: playlistRepo, youtube: ytApi, spotify: spotify}
 }
 
 /*
@@ -33,7 +33,7 @@ Search - метод для поиска треков на какой-либо и
 Search(ctx context.Context, query string, userId int64) ([]dto.Track, error)
 Изменилась, из-за поддержки множества площадок, а так же, из-за ненадобности получения списка плейлистов для трека
 */
-func (s *Track) Search(ctx context.Context, platform, query string) ([]dto.Track, error) {
+func (s *TrackService) Search(ctx context.Context, platform, query string) ([]dto.Track, error) {
 	var tracks []dto.Track
 	var err error
 
@@ -57,7 +57,7 @@ func (s *Track) Search(ctx context.Context, platform, query string) ([]dto.Track
 	return tracks, nil
 }
 
-func (s *Track) GetById(ctx context.Context, id string) (dto.Track, error) {
+func (s *TrackService) GetById(ctx context.Context, id string) (dto.Track, error) {
 	track, err := s.trackRepo.GetById(ctx, id)
 	if err != nil {
 		return dto.Track{}, err
@@ -73,7 +73,7 @@ func (s *Track) GetById(ctx context.Context, id string) (dto.Track, error) {
 	}, nil
 }
 
-func (s *Track) Approve(ctx context.Context, playlistId, trackId string, userId int64) error {
+func (s *TrackService) Approve(ctx context.Context, playlistId, trackId string, userId int64) error {
 	playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err
@@ -103,7 +103,7 @@ func (s *Track) Approve(ctx context.Context, playlistId, trackId string, userId 
 	return nil
 }
 
-func (s *Track) Decline(ctx context.Context, playlistId, trackId string, userId int64) error {
+func (s *TrackService) Decline(ctx context.Context, playlistId, trackId string, userId int64) error {
 	playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err
@@ -134,7 +134,7 @@ func (s *Track) Decline(ctx context.Context, playlistId, trackId string, userId 
 	return nil
 }
 
-func (s *Track) Submit(ctx context.Context, playlistId, trackId string, userId int64) error {
+func (s *TrackService) Submit(ctx context.Context, playlistId, trackId string, userId int64) error {
 	playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err
@@ -166,7 +166,7 @@ func (s *Track) Submit(ctx context.Context, playlistId, trackId string, userId i
 	return nil
 }
 
-func (s *Track) Unapprove(ctx context.Context, playlistId, trackId string, userId int64) error {
+func (s *TrackService) Unapprove(ctx context.Context, playlistId, trackId string, userId int64) error {
 	playlist, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err

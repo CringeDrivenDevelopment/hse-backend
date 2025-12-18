@@ -19,13 +19,11 @@ type Bot struct {
 	playlistService   interfaces.PlaylistService
 	permissionService interfaces.PermissionService
 	logger            *zap.Logger
-	// dl                *downloader.Downloader
-	// s3                *service.S3Service
 
 	client *gotgproto.Client
 }
 
-func New(cfg *infra.Config, playlistService *service.Playlist, permissionService *service.Permission, logger *zap.Logger) (*Bot, error) {
+func New(cfg *infra.Config, playlistService *service.PlaylistService, permissionService *service.PermissionService, logger *zap.Logger) (*Bot, error) {
 	var dcList dcs.List
 
 	if cfg.Debug {
@@ -51,13 +49,6 @@ func New(cfg *infra.Config, playlistService *service.Playlist, permissionService
 
 	self := client.Self
 	logger.Info("bot logged in as https://t.me/" + self.Username)
-
-	/*
-		s3Service, err := service.NewS3Service(app)
-		if err != nil {
-			return nil, err
-		}
-	*/
 
 	return &Bot{
 		playlistService:   playlistService,

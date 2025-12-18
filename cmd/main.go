@@ -70,11 +70,11 @@ func main() {
 			spotify.New,
 
 			// service layer
-			service.NewAuth,
-			service.NewPermission,
-			service.NewPlaylist,
-			service.NewTrack,
-			service.NewUser,
+			service.NewAuthService,
+			service.NewPermissionService,
+			service.NewPlaylistService,
+			service.NewTrackService,
+			service.NewUserService,
 		),
 		fx.Invoke(func(auth *handlers.Auth, track *handlers.Track, playlist *handlers.Playlist) {
 			// need each of controllers, to register them

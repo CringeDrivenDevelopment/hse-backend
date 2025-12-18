@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"backend/internal/domain/queries"
+	"backend/internal/domain/entity"
 	"backend/internal/transport/bot/utils"
 	"errors"
 	"strconv"
@@ -30,7 +30,7 @@ func (b *Bot) handleGroup(ctx *ext.Context, update *ext.Update) error {
 			return nil
 		}
 
-		if data.PrevRole == queries.PlaylistRoleViewer && data.NewRole == queries.PlaylistRoleModerator {
+		if data.PrevRole == entity.PlaylistRoleViewer && data.NewRole == entity.PlaylistRoleModerator {
 			_, err := ctx.SendMessage(data.ChatID, &tg.MessagesSendMessageRequest{Message: "Респект тебе за админку, сейчас создам плейлист!"})
 			if err != nil {
 				b.logger.Error(err.Error())
@@ -47,7 +47,7 @@ func (b *Bot) handleGroup(ctx *ext.Context, update *ext.Update) error {
 			// TODO: handle group avatar, set type
 
 			// create playlist
-			create, err := b.playlistService.Create(ctx.Context, chat.Title, queries.PlaylistTypeYoutube, data.ChatID)
+			create, err := b.playlistService.Create(ctx.Context, chat.Title, entity.PlaylistTypeYoutube, data.ChatID)
 			if err != nil {
 				b.logger.Error(err.Error())
 				return err
@@ -62,7 +62,7 @@ func (b *Bot) handleGroup(ctx *ext.Context, update *ext.Update) error {
 			return nil
 		}
 
-		if data.NewRole == "" || data.NewRole == queries.PlaylistRoleViewer {
+		if data.NewRole == "" || data.NewRole == entity.PlaylistRoleViewer {
 			playlist, err := b.playlistService.GetByGroup(ctx, data.ChatID)
 			if err != nil {
 				b.logger.Error(err.Error())

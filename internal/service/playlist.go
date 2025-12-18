@@ -10,16 +10,16 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
-type Playlist struct {
+type PlaylistService struct {
 	playlistRepo *repo.PlaylistRepo
 	trackRepo    *repo.TrackRepo
 }
 
-func NewPlaylist(pool *pgxpool.Pool, trackRepo *repo.TrackRepo) *Playlist {
-	return &Playlist{playlistRepo: repo.NewPlaylistRepo(pool), trackRepo: trackRepo}
+func NewPlaylistService(pool *pgxpool.Pool, trackRepo *repo.TrackRepo) *PlaylistService {
+	return &PlaylistService{playlistRepo: repo.NewPlaylistRepo(pool), trackRepo: trackRepo}
 }
 
-func (s *Playlist) Create(ctx context.Context, title string, playlistType entity.PlaylistType, telegramId int64) (dto.Playlist, error) {
+func (s *PlaylistService) Create(ctx context.Context, title string, playlistType entity.PlaylistType, telegramId int64) (dto.Playlist, error) {
 	id := ulid.Make().String()
 	if err := s.playlistRepo.Create(ctx, id, title, playlistType, telegramId); err != nil {
 		return dto.Playlist{}, err
@@ -27,15 +27,15 @@ func (s *Playlist) Create(ctx context.Context, title string, playlistType entity
 	return dto.Playlist{Id: id, Title: title, Type: string(playlistType)}, nil
 }
 
-func (s *Playlist) GetByGroup(ctx context.Context, telegramId int64) (dto.Playlist, error) {
-    pl, err := s.playlistRepo.GetByGroup(ctx, telegramId)
-    if err != nil {
-        return dto.Playlist{}, err
-    }
-    return s.playlistRepo.BuildGroupDTO(ctx, pl, s.trackRepo)
+func (s *PlaylistService) GetByGroup(ctx context.Context, telegramId int64) (dto.Playlist, error) {
+	pl, err := s.playlistRepo.GetByGroup(ctx, telegramId)
+	if err != nil {
+		return dto.Playlist{}, err
+	}
+	return s.playlistRepo.BuildGroupDTO(ctx, pl, s.trackRepo)
 }
 
-func (s *Playlist) GetById(ctx context.Context, playlistId string, userId int64) (dto.Playlist, error) {
+func (s *PlaylistService) GetById(ctx context.Context, playlistId string, userId int64) (dto.Playlist, error) {
 	pl, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return dto.Playlist{}, err
@@ -43,7 +43,7 @@ func (s *Playlist) GetById(ctx context.Context, playlistId string, userId int64)
 	return s.playlistRepo.BuildDTO(ctx, pl, s.trackRepo)
 }
 
-func (s *Playlist) GetAll(ctx context.Context, userId int64) ([]dto.Playlist, error) {
+func (s *PlaylistService) GetAll(ctx context.Context, userId int64) ([]dto.Playlist, error) {
 	playlists, err := s.playlistRepo.GetAllByUser(ctx, userId)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (s *Playlist) GetAll(ctx context.Context, userId int64) ([]dto.Playlist, er
 	return result, nil
 }
 
-func (s *Playlist) Rename(ctx context.Context, playlistId, title string, userId int64) error {
+func (s *PlaylistService) Rename(ctx context.Context, playlistId, title string, userId int64) error {
 	pl, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err
@@ -71,7 +71,7 @@ func (s *Playlist) Rename(ctx context.Context, playlistId, title string, userId 
 	return s.playlistRepo.Edit(ctx, entity.EditPlaylistParams{ID: pl.ID, Title: pl.Title})
 }
 
-func (s *Playlist) UpdatePhoto(ctx context.Context, playlistId, thumbnail string, userId int64) error {
+func (s *PlaylistService) UpdatePhoto(ctx context.Context, playlistId, thumbnail string, userId int64) error {
 	pl, err := s.playlistRepo.GetUserPlaylist(ctx, playlistId, userId)
 	if err != nil {
 		return err
@@ -80,7 +80,7 @@ func (s *Playlist) UpdatePhoto(ctx context.Context, playlistId, thumbnail string
 	return s.playlistRepo.Edit(ctx, entity.EditPlaylistParams{ID: pl.ID, Thumbnail: pl.Thumbnail})
 }
 
-func (s *Playlist) Delete(ctx context.Context, playlistId string) error {
+func (s *PlaylistService) Delete(ctx context.Context, playlistId string) error {
 	// Delegate deletion to the repository layer to keep DB logic out of the service.
 	return s.playlistRepo.Delete(ctx, playlistId)
 }

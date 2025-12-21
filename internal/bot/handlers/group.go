@@ -59,7 +59,8 @@ func (h *GroupHandler) HandleGroup(ctx *ext.Context, update *ext.Update) error {
 }
 
 func (h *GroupHandler) handleBot(ctx *ext.Context, data *dto.Participant) error {
-	if data.PrevRole == "" {
+	// only in group you can add bot as non admin
+	if data.PrevRole == "" && data.NewRole == entity.PlaylistRoleViewer {
 		_, err := ctx.SendMessage(data.ActorID, &tg.MessagesSendMessageRequest{Message: "Привет, я Лотти - бот для управления плейлистами!" + "\n\n" +
 			"Можешь дать мне права администратора (чтобы я мог видеть лог AKA recent actions/недавние действия, а также всех участников и администраторов)"})
 		if err != nil {

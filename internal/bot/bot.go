@@ -42,6 +42,7 @@ func NewBotClient(cfg *infra.Config, logger *zap.Logger) (*gotgproto.Client, err
 	logger.Info("bot logged in", zap.String("username", self.Username))
 
 	go func() {
+		// TODO: add stop with FX
 		if err := client.Idle(); err != nil {
 			logger.Error("failed to start a bot", zap.Error(err))
 		}

@@ -68,7 +68,7 @@ func (h *GroupHandler) handleBot(ctx *ext.Context, data *dto.Participant) error 
 		return nil
 	}
 
-	if data.PrevRole == entity.PlaylistRoleViewer && data.NewRole == entity.PlaylistRoleModerator {
+	if (data.PrevRole == entity.PlaylistRoleViewer || data.PrevRole == "") && data.NewRole == entity.PlaylistRoleModerator {
 		_, err := ctx.SendMessage(data.ActorID, &tg.MessagesSendMessageRequest{Message: "Респект тебе за админку, сейчас создам плейлист!"})
 		if err != nil {
 			h.logger.Error("failed to send message", zap.Error(err))

@@ -40,6 +40,7 @@ func NewPostgresConnection(lc fx.Lifecycle, logger *zap.Logger, cfg *Config) (*p
 
 			// run migrations
 			goose.SetBaseFS(projectroot.EmbedMigrations)
+			goose.SetLogger(&ZapGooseAdapter{zap: logger})
 			if err := goose.SetDialect("postgres"); err != nil {
 				return err
 			}

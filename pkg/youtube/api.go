@@ -118,7 +118,7 @@ func (s *API) Search(ctx context.Context, query string) ([]dto.Track, error) {
 		}
 		defer zstdReader.Close()
 		reader = zstdReader
-		// Add cases for "deflate" if needed
+		// AddBatch cases for "deflate" if needed
 	default:
 		// No compression or unsupported encoding
 		reader = resp.Body
@@ -128,8 +128,6 @@ func (s *API) Search(ctx context.Context, query string) ([]dto.Track, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	println(string(respBytes))
 
 	var result SearchResponse
 	if err := sonic.Unmarshal(respBytes, &result); err != nil {

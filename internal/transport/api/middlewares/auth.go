@@ -17,7 +17,7 @@ type Auth struct {
 const UserJwtKey = "user"
 
 // NewAuth - создать новый обработчик для middleware
-func NewAuth(authService *service.Auth, api huma.API, logger *zap.Logger) *Auth {
+func NewAuth(authService *service.AuthService, api huma.API, logger *zap.Logger) *Auth {
 
 	return &Auth{
 		authService: authService,

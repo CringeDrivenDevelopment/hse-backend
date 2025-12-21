@@ -1,16 +1,12 @@
 # Muse Backend
 
 ## API TODO:
-- интерфейсы
-- нормальная структура
 - дока
 - тесты
 - отель
 - ютуб
 - спотик
 - иноагенты
-- logger (никогда)
-- normal errors (никогда)
 
 ## Запуск
 ```shell
@@ -22,64 +18,82 @@ go run cmd/main.go
 ```
 
 ## Структура проекта
-```shell
-
+```
+├── .gitignore
+├── Dockerfile # Docker образ
+├── .dockerignore # файлы, которые надо игнорировать при сборке
 ├── README.md
-├── compose.yml
-├── Dockerfile
-├── cmd
-│ ├── app
-│ │ └── app.go
-│ └── main.go # точка входа
-├── dev-compose.yml
+├── Taskfile.yml # аналог makefile, хранилище для скриптов
+├── cmd 
+│ └── main.go # входная точка
+├── compose.yml # PROD compose
+├── dev-compose.yml # зависимости для dev режима
+├── dev.env
+├── embed.go # доступ до файлов, которые нужно хранить в бинарнике (миграции)
 ├── go.mod
 ├── go.sum
+├── initdata.py # скрипт для генерации Telegram Init Data Raw
 ├── internal
-│ ├── adapters
-│ │ ├── config # конфигурация
-│ │ │ └── config.go
-│ │ ├── handlers
-│ │ │ ├── api # функции APi
-│ │ │ │ ├── middlewares
-│ │ │ │ │ └── jwt.go
-│ │ │ │ ├── playlist.go
-│ │ │ │ ├── setup.go
-│ │ │ │ ├── track.go
-│ │ │ │ ├── user.go
-│ │ │ │ ├── validator
-│ │ │ │ │ └── validator.go
-│ │ │ │ └── youtube.go
-│ │ │ └── bot # функции бота
-│ │ │     ├── group.go
-│ │ │     ├── setup.go
-│ │ │     ├── start.go
-│ │ │     └── utils.go
-│ │ └── repository # sql обёртка
+│ ├── infra # базовые части приложения
+│ │ ├── config.go
+│ │ ├── db.go
+│ │ ├── echo.go
+│ │ ├── huma.go
+│ │ ├── logger.go
+│ │ └── queries # сгенерированный код для взаимодействия с PostgreSQL
 │ │     ├── db.go
 │ │     ├── models.go
-│ │     └── schema.sql.go
-│ └── domain
-│     ├── dto # модельки запросов на отдачу фронтэнду
-│     │ ├── file.go
-│     │ ├── ping.go
-│     │ ├── playlist.go
-│     │ ├── token.go
-│     │ ├── track.go
-│     │ └── user.go
-│     ├── service # логика частей приложения
-│     │ ├── const.go
-│     │ ├── permissions.go
-│     │ ├── playlist.go
-│     │ ├── token.go
-│     │ ├── track.go
-│     │ ├── user.go
-│     │ └── youtube.go
-│     └── utils # хелперы
-│         ├── connection.go
-│         └── telegram.go
-├── sql
-│ └── schema.sql # сырые SQL команды
-└── sqlc.yml # конфиг для генерации обёртки над SQL кодом
+│ │     └── queries.sql.go
+│ ├── interfaces # интерфейсы для тестов, сервисов и хэндлеров
+│ │ ├── api.go
+│ │ └── service.go
+│ ├── service # сервисы с логикой
+│ │ ├── auth.go
+│ │ ├── permission.go
+│ │ ├── playlist.go
+│ │ ├── track.go
+│ │ └── user.go
+│ └── transport 
+│     ├── api # REST API
+│     │ ├── dto
+│     │ │ ├── auth.go
+│     │ │ ├── playlist.go
+│     │ │ └── track.go
+│     │ ├── handlers
+│     │ │ ├── auth.go
+│     │ │ ├── playlist.go
+│     │ │ ├── setup.go
+│     │ │ └── track.go
+│     │ └── middlewares
+│     │     ├── auth.go
+│     │     └── logger.go
+│     └── bot # Telegram Bot
+│         ├── handlers
+│         │ ├── chataction.go
+│         │ ├── group.go
+│         │ ├── setup.go
+│         │ └── start.go
+│         ├── models
+│         │ └── permission.go
+│         └── utils
+│             ├── chat.go
+│             ├── extract.go
+│             ├── iterate.go
+│             └── participant.go
+├── pkg
+│ ├── utils # функции хелперы
+│ │ ├── db.go
+│ │ └── errorz.go
+│ └── youtube # Innertube API
+│     ├── api.go
+│     ├── models.go
+│     └── parser.go
+├── sql # сырые SQL запросы (миграции, код для SQLC)
+│ ├── migrations
+│ │ └── 20250926213346_init.sql
+│ ├── queries.sql
+│ └── schema.sql
+└── sqlc.yml # конфиг SQLC
 ```
 
 # Roles

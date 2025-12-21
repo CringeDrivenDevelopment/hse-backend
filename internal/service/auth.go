@@ -4,6 +4,7 @@ import (
 	"backend/internal/infra"
 	"backend/internal/transport/api/dto"
 	"backend/pkg/utils"
+	"encoding/base64"
 	"net/url"
 	"strconv"
 	"strings"
@@ -12,18 +13,19 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/golang-jwt/jwt/v5"
 	initdata "github.com/telegram-mini-apps/init-data-golang"
+	"golang.org/x/oauth2"
 )
 
-type Auth struct {
+type AuthService struct {
 	secret   string
 	botToken string
 
 	expires time.Duration
 }
 
-// NewAuth - создать новый экземпляр сервиса авторизации
-func NewAuth(cfg *infra.Config) *Auth {
-	return &Auth{
+// NewAuthService - создать новый экземпляр сервиса авторизации
+func NewAuthService(cfg *infra.Config) *AuthService {
+	return &AuthService{
 		secret:   cfg.JwtSecret,
 		botToken: cfg.BotToken,
 		expires:  time.Hour,
@@ -31,7 +33,7 @@ func NewAuth(cfg *infra.Config) *Auth {
 }
 
 // VerifyToken - проверить токен на подлинность
-func (s *Auth) VerifyToken(authHeader string) (int64, error) {
+func (s *AuthService) VerifyToken(authHeader string) (int64, error) {
 	tokenStr := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
 	if tokenStr == "" {
 		return 0, utils.ErrInvalidToken
@@ -68,7 +70,7 @@ func (s *Auth) VerifyToken(authHeader string) (int64, error) {
 }
 
 // GenerateToken - создать новый JWT токен
-func (s *Auth) GenerateToken(userID int64) (string, error) {
+func (s *AuthService) GenerateToken(userID int64) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": strconv.FormatInt(userID, 10),
 		"iat": time.Now().Unix(),
@@ -79,8 +81,8 @@ func (s *Auth) GenerateToken(userID int64) (string, error) {
 	return token.SignedString([]byte(s.secret))
 }
 
-// ParseInitData - извлечь Telegram ID из Init Data Raw
-func (s *Auth) ParseInitData(initDataRaw string) (int64, error) {
+// ParseTelegramData - извлечь Telegram ID из Init Data Raw
+func (s *AuthService) ParseTelegramData(initDataRaw string) (int64, error) {
 	if err := initdata.Validate(initDataRaw, s.botToken, s.expires); err != nil {
 		return 0, utils.ErrInvalidInitData
 	}
@@ -103,4 +105,21 @@ func (s *Auth) ParseInitData(initDataRaw string) (int64, error) {
 	}
 
 	return user.ID, nil
+}
+
+// ParseSpotifyData - извлечь данные для входа в Spotify из строки в base64
+// TODO: USE HTTP ONLY COOKIE!!!!!
+func (s *AuthService) ParseSpotifyData(spotifyAuthHeader string) (*oauth2.Token, error) {
+	decodedValue, err := base64.StdEncoding.DecodeString(spotifyAuthHeader)
+	if err != nil {
+		return nil, err
+	}
+
+	var token oauth2.Token
+	err = sonic.Unmarshal(decodedValue, &token)
+	if err != nil {
+		return nil, err
+	}
+
+	return &token, nil
 }

@@ -11,7 +11,7 @@ type Track struct {
 
 type TrackAction struct {
 	PlaylistId string `path:"playlist_id" minLength:"26" maxLength:"26" example:"01JZ35PYGP6HJA08H0NHYPBHWD" doc:"playlist id"`
-	TrackId    string `path:"track_id" minLength:"11" maxLength:"11" example:"dQw4w9WgXcQ" doc:"track id"`
+	TrackId    string `path:"track_id" minLength:"11" maxLength:"22" example:"dQw4w9WgXcQ" doc:"track id"`
 }
 
 type SearchResponse struct {

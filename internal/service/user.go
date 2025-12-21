@@ -1,43 +1,25 @@
 package service
 
 import (
-	"backend/internal/infra/queries"
-	"backend/pkg/utils"
+	"backend/internal/infra/repo"
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type User struct {
-	pool *pgxpool.Pool
+type UserService struct {
+	repo *repo.UserRepo
 }
 
-func NewUser(pool *pgxpool.Pool) *User {
-	return &User{pool: pool}
+func NewUserService(pool *pgxpool.Pool) *UserService {
+	return &UserService{repo: repo.NewUserRepo(pool)}
 }
 
-func (s *User) Create(ctx context.Context, id int64) error {
-	rq := queries.New(s.pool)
-	if _, err := rq.GetUserById(ctx, id); err == nil {
-		return nil
-	}
-
-	if err := utils.ExecInTx(ctx, s.pool, func(tq *queries.Queries) error {
-		return tq.CreateUser(ctx, id)
-	}); err != nil {
-		return err
-	}
-
-	return nil
+func (s *UserService) Create(ctx context.Context, id int64) error {
+	return s.repo.CreateIfNotExists(ctx, id)
 }
 
-func (s *User) GetByID(ctx context.Context, id int64) error {
-	rq := queries.New(s.pool)
-
-	_, err := rq.GetUserById(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (s *UserService) GetByID(ctx context.Context, id int64) error {
+	_, err := s.repo.Exists(ctx, id)
+	return err
 }

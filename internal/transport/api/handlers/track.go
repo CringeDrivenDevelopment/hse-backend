@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"backend/internal/domain/entity"
 	"backend/internal/interfaces"
 	"backend/internal/service"
 	"backend/internal/transport/api/dto"
@@ -47,7 +48,7 @@ func (h *Track) search(ctx context.Context, input *struct {
 
 	h.logger.Info(fmt.Sprintf("search: user_id - %d, query - %s", val, query))
 
-	search, err := h.trackService.Search(ctx, "spotify", query)
+	search, err := h.trackService.Search(ctx, string(entity.PlaylistTypeYoutube), query)
 	if err != nil {
 		h.logger.Error(fmt.Sprintf("search error: user_id - %d, query - %s, error - %s", val, query, err.Error()))
 

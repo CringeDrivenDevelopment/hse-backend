@@ -30,7 +30,7 @@ func NewBotClient(cfg *infra.Config, logger *zap.Logger) (*gotgproto.Client, err
 			DCList:           dcList,
 			DisableCopyright: true,
 			InMemory:         true,
-			Session:          sessionMaker.SqlSession(sqlite.Open("telegram/bot.db")),
+			Session:          sessionMaker.SqlSession(sqlite.Open("./telegram/bot.db")),
 			Logger:           logger,
 		},
 	)

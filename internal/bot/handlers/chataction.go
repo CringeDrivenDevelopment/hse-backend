@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"backend/internal/service"
 	"context"
 	"errors"
 
@@ -20,8 +21,8 @@ type ChatActionHandler struct {
 }
 
 func NewChatActionHandler(
-	playlistService interfaces.PlaylistService,
-	participantService interfaces.ParticipantService,
+	playlistService *service.PlaylistService,
+	participantService *service.ParticipantService,
 	logger *zap.Logger,
 ) *ChatActionHandler {
 	return &ChatActionHandler{
@@ -63,6 +64,7 @@ func (h *ChatActionHandler) HandleChatAction(ctx *ext.Context, update *ext.Updat
 		}
 	case *tg.MessageActionChatAddUser:
 		err = h.participantService.Add(ctx.Context, chatID, smResult.Users)
+		// TODO: add more
 		if err != nil {
 			h.logger.Error("failed to handle add user", zap.Error(err))
 		}

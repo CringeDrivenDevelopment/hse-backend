@@ -2,6 +2,8 @@ package main
 
 import (
 	"backend/internal/bot"
+	botHandlers "backend/internal/bot/handlers"
+	botService "backend/internal/bot/service"
 	"backend/internal/infra"
 	"backend/internal/infra/repo"
 	"backend/internal/service"
@@ -13,6 +15,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/celestix/gotgproto"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
@@ -55,6 +58,18 @@ func main() {
 			handlers.NewPlaylist,
 			handlers.NewTrack,
 
+			// bot
+			bot.NewBotClient,
+
+			// bot handlers
+			botHandlers.NewStartHandler,
+			botHandlers.NewChatActionHandler,
+			botHandlers.NewGroupHandler,
+
+			// bot services
+			botService.NewParticipantService,
+			botService.NewChatService,
+
 			// infra
 			infra.NewEcho,
 			infra.NewHuma,
@@ -78,11 +93,22 @@ func main() {
 			service.NewUserService,
 			service.NewParticipantService,
 		),
-		bot.Module,
-		fx.Invoke(func(auth *handlers.Auth, track *handlers.Track, playlist *handlers.Playlist) {
+		// bot.Module,
+		fx.Invoke(func(
+			auth *handlers.Auth,
+			track *handlers.Track,
+			playlist *handlers.Playlist,
+			client *gotgproto.Client,
+			groupHandler *botHandlers.GroupHandler,
+			chatActionHandler *botHandlers.ChatActionHandler,
+			startHandler *botHandlers.StartHandler) {
 			// need each of controllers, to register them
 
 			// no need to call infra, apis and services, they're deps, started automatically
+
+			// register bot handlers
+			// TODO: move to modules
+			bot.RegisterHandlers(client, groupHandler, chatActionHandler, startHandler)
 		}),
 	).Run()
 }

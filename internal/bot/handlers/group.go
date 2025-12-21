@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"backend/internal/bot/dto"
-	"backend/internal/bot/services"
+	botService "backend/internal/bot/service"
 	"backend/internal/domain/entity"
 	"backend/internal/interfaces"
+	"backend/internal/service"
 	"context"
 	"errors"
 
@@ -18,17 +19,17 @@ import (
 type GroupHandler struct {
 	playlistService   interfaces.PlaylistService
 	permissionService interfaces.PermissionService
-	chatService       *services.ChatService
-	partService       *services.ParticipantService
+	chatService       *botService.ChatService
+	partService       *botService.ParticipantService
 	client            *gotgproto.Client
 	logger            *zap.Logger
 }
 
 func NewGroupHandler(
-	playlistService interfaces.PlaylistService,
-	permissionService interfaces.PermissionService,
-	chatService *services.ChatService,
-	partService *services.ParticipantService,
+	playlistService *service.PlaylistService,
+	permissionService *service.PermissionService,
+	chatService *botService.ChatService,
+	partService *botService.ParticipantService,
 	client *gotgproto.Client,
 	logger *zap.Logger,
 ) *GroupHandler {

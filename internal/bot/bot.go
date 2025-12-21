@@ -2,7 +2,6 @@ package bot
 
 import (
 	appHandlers "backend/internal/bot/handlers"
-	"backend/internal/bot/services"
 	"backend/internal/infra"
 
 	"github.com/celestix/gotgproto"
@@ -11,21 +10,8 @@ import (
 	"github.com/celestix/gotgproto/types"
 	"github.com/gotd/td/telegram/dcs"
 	"github.com/gotd/td/tg"
-	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"gorm.io/driver/sqlite"
-)
-
-var Module = fx.Options(
-	fx.Provide(
-		NewBotClient,
-		appHandlers.NewGroupHandler,
-		appHandlers.NewChatActionHandler,
-		appHandlers.NewStartHandler,
-		services.NewChatService,
-		services.NewParticipantService,
-	),
-	fx.Invoke(RegisterHandlers),
 )
 
 func NewBotClient(cfg *infra.Config, logger *zap.Logger) (*gotgproto.Client, error) {

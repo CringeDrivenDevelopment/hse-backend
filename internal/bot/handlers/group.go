@@ -60,7 +60,7 @@ func (h *GroupHandler) HandleGroup(ctx *ext.Context, update *ext.Update) error {
 
 func (h *GroupHandler) handleBot(ctx *ext.Context, data *dto.Participant) error {
 	if data.PrevRole == "" {
-		_, err := ctx.SendMessage(data.ChatID, &tg.MessagesSendMessageRequest{Message: "Привет, я Лотти - бот для управления плейлистами!" + "\n\n" +
+		_, err := ctx.SendMessage(data.ActorID, &tg.MessagesSendMessageRequest{Message: "Привет, я Лотти - бот для управления плейлистами!" + "\n\n" +
 			"Можешь дать мне права администратора (чтобы я мог видеть лог AKA recent actions/недавние действия, а также всех участников и администраторов)"})
 		if err != nil {
 			h.logger.Error("failed to send message", zap.Error(err))
@@ -69,7 +69,7 @@ func (h *GroupHandler) handleBot(ctx *ext.Context, data *dto.Participant) error 
 	}
 
 	if data.PrevRole == entity.PlaylistRoleViewer && data.NewRole == entity.PlaylistRoleModerator {
-		_, err := ctx.SendMessage(data.ChatID, &tg.MessagesSendMessageRequest{Message: "Респект тебе за админку, сейчас создам плейлист!"})
+		_, err := ctx.SendMessage(data.ActorID, &tg.MessagesSendMessageRequest{Message: "Респект тебе за админку, сейчас создам плейлист!"})
 		if err != nil {
 			h.logger.Error("failed to send message", zap.Error(err))
 			return nil

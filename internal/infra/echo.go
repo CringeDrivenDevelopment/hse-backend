@@ -27,8 +27,9 @@ func NewEcho(lc fx.Lifecycle, cfg *Config, logger *zap.Logger, loggerWare echo.M
 	router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
 			"https://tg-mini-app.local",
+			"https://muse-ghp.lxft.tech",
 			"https://muse.lxft.tech",
-			"https://lxft.tech",
+			"https://localhost",
 			"http://localhost",
 		},
 	}))

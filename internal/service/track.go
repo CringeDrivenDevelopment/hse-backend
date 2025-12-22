@@ -110,6 +110,8 @@ func (s *TrackService) Decline(ctx context.Context, playlistId, trackId string, 
 		return err
 	}
 
+	// TODO: add a safeguard if track is allowed
+
 	if playlist.Role != entity.PlaylistRoleOwner && playlist.Role != entity.PlaylistRoleModerator {
 		return utils.ErrNotEnoughPerms
 	}
@@ -126,9 +128,9 @@ func (s *TrackService) Decline(ctx context.Context, playlistId, trackId string, 
 	}
 
 	if err := s.trackRepo.Update(ctx, entity.EditPlaylistParams{
-		ID:            playlistId,
-		AllowedTracks: playlist.AllowedTracks,
-		Type:          playlist.Type,
+		ID:     playlistId,
+		Tracks: playlist.Tracks,
+		Type:   playlist.Type,
 	}); err != nil {
 		return err
 	}

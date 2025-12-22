@@ -1,6 +1,6 @@
 -- name: CreatePlaylist :exec
-INSERT INTO playlists (id, title, thumbnail, tracks, allowed_tracks, type, external_id, telegram_id)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+INSERT INTO playlists (id, title, thumbnail, tracks, allowed_tracks, type, telegram_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7);
 
 -- name: EditPlaylist :exec
 UPDATE playlists
@@ -10,8 +10,7 @@ SET
     tracks = COALESCE($4, tracks),
     allowed_tracks = COALESCE($5, allowed_tracks),
     type = COALESCE($6, type),
-    external_id = COALESCE($7, external_id),
-    telegram_id = COALESCE($8, external_id)
+    telegram_id = COALESCE($7, telegram_id)
 WHERE id = $1;
 
 -- name: DeletePlaylist :exec

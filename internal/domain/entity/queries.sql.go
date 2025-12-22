@@ -12,8 +12,8 @@ import (
 )
 
 const createPlaylist = `-- name: CreatePlaylist :exec
-INSERT INTO playlists (id, title, thumbnail, tracks, allowed_tracks, type, external_id, telegram_id)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+INSERT INTO playlists (id, title, thumbnail, tracks, allowed_tracks, type, telegram_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 `
 
 type CreatePlaylistParams struct {
@@ -23,7 +23,6 @@ type CreatePlaylistParams struct {
 	Tracks        []string
 	AllowedTracks []string
 	Type          PlaylistType
-	ExternalID    string
 	TelegramID    int64
 }
 
@@ -35,7 +34,6 @@ func (q *Queries) CreatePlaylist(ctx context.Context, arg CreatePlaylistParams) 
 		arg.Tracks,
 		arg.AllowedTracks,
 		arg.Type,
-		arg.ExternalID,
 		arg.TelegramID,
 	)
 	return err
@@ -124,8 +122,7 @@ SET
     tracks = COALESCE($4, tracks),
     allowed_tracks = COALESCE($5, allowed_tracks),
     type = COALESCE($6, type),
-    external_id = COALESCE($7, external_id),
-    telegram_id = COALESCE($8, external_id)
+    telegram_id = COALESCE($7, telegram_id)
 WHERE id = $1
 `
 
@@ -136,7 +133,6 @@ type EditPlaylistParams struct {
 	Tracks        []string
 	AllowedTracks []string
 	Type          PlaylistType
-	ExternalID    string
 	TelegramID    int64
 }
 
@@ -148,7 +144,6 @@ func (q *Queries) EditPlaylist(ctx context.Context, arg EditPlaylistParams) erro
 		arg.Tracks,
 		arg.AllowedTracks,
 		arg.Type,
-		arg.ExternalID,
 		arg.TelegramID,
 	)
 	return err
@@ -173,7 +168,7 @@ func (q *Queries) EditRole(ctx context.Context, arg EditRoleParams) error {
 
 const getGroupPlaylist = `-- name: GetGroupPlaylist :one
 SELECT
-    id, title, thumbnail, type, external_id, telegram_id, tracks, allowed_tracks, count, allowed_count, time
+    id, title, thumbnail, type, telegram_id, tracks, allowed_tracks, count, allowed_count, time
 FROM playlists
 WHERE telegram_id = $1
 `
@@ -186,7 +181,6 @@ func (q *Queries) GetGroupPlaylist(ctx context.Context, telegramID int64) (Playl
 		&i.Title,
 		&i.Thumbnail,
 		&i.Type,
-		&i.ExternalID,
 		&i.TelegramID,
 		&i.Tracks,
 		&i.AllowedTracks,
@@ -280,7 +274,7 @@ func (q *Queries) GetUserById(ctx context.Context, id int64) (int64, error) {
 
 const getUserPlaylistById = `-- name: GetUserPlaylistById :one
 SELECT
-    pl.id, pl.title, pl.thumbnail, pl.type, pl.external_id, pl.telegram_id, pl.tracks, pl.allowed_tracks, pl.count, pl.allowed_count, pl.time,
+    pl.id, pl.title, pl.thumbnail, pl.type, pl.telegram_id, pl.tracks, pl.allowed_tracks, pl.count, pl.allowed_count, pl.time,
     p.role
 FROM playlist_permissions p
          JOIN playlists pl ON p.playlist_id = pl.id
@@ -298,7 +292,6 @@ type GetUserPlaylistByIdRow struct {
 	Title         string
 	Thumbnail     string
 	Type          PlaylistType
-	ExternalID    string
 	TelegramID    int64
 	Tracks        []string
 	AllowedTracks []string
@@ -316,7 +309,6 @@ func (q *Queries) GetUserPlaylistById(ctx context.Context, arg GetUserPlaylistBy
 		&i.Title,
 		&i.Thumbnail,
 		&i.Type,
-		&i.ExternalID,
 		&i.TelegramID,
 		&i.Tracks,
 		&i.AllowedTracks,
@@ -330,7 +322,7 @@ func (q *Queries) GetUserPlaylistById(ctx context.Context, arg GetUserPlaylistBy
 
 const getUserPlaylists = `-- name: GetUserPlaylists :many
 SELECT
-    pl.id, pl.title, pl.thumbnail, pl.type, pl.external_id, pl.telegram_id, pl.tracks, pl.allowed_tracks, pl.count, pl.allowed_count, pl.time,
+    pl.id, pl.title, pl.thumbnail, pl.type, pl.telegram_id, pl.tracks, pl.allowed_tracks, pl.count, pl.allowed_count, pl.time,
     p.role
 FROM playlists pl
          JOIN playlist_permissions p ON pl.id = p.playlist_id
@@ -343,7 +335,6 @@ type GetUserPlaylistsRow struct {
 	Title         string
 	Thumbnail     string
 	Type          PlaylistType
-	ExternalID    string
 	TelegramID    int64
 	Tracks        []string
 	AllowedTracks []string
@@ -367,7 +358,6 @@ func (q *Queries) GetUserPlaylists(ctx context.Context, userID int64) ([]GetUser
 			&i.Title,
 			&i.Thumbnail,
 			&i.Type,
-			&i.ExternalID,
 			&i.TelegramID,
 			&i.Tracks,
 			&i.AllowedTracks,

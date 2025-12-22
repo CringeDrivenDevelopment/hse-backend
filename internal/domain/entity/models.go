@@ -102,7 +102,6 @@ type Playlist struct {
 	Title         string
 	Thumbnail     string
 	Type          PlaylistType
-	ExternalID    string
 	TelegramID    int64
 	Tracks        []string
 	AllowedTracks []string

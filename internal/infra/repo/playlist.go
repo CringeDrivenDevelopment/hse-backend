@@ -29,7 +29,6 @@ func (r *PlaylistRepo) Create(ctx context.Context, id, title string, ptype entit
 			Tracks:        make([]string, 0),
 			AllowedTracks: make([]string, 0),
 			Type:          ptype,
-			ExternalID:    "",
 			TelegramID:    telegramId,
 		})
 	})
@@ -86,25 +85,25 @@ func (r *PlaylistRepo) BuildDTO(ctx context.Context, pl entity.GetUserPlaylistBy
 
 // BuildGroupDTO creates a DTO for a group playlist (entity.Playlist).
 func (r *PlaylistRepo) BuildGroupDTO(ctx context.Context, pl entity.Playlist, tr *TrackRepo) (dto.Playlist, error) {
-    // Resolve track DTOs
-    tracks := make([]dto.Track, len(pl.Tracks))
-    for i, tid := range pl.Tracks {
-        t, err := tr.GetById(ctx, tid)
-        if err != nil {
-            return dto.Playlist{}, err
-        }
-        tracks[i] = dto.Track{Id: t.ID, Title: t.Title, Authors: t.Authors, Thumbnail: t.Thumbnail, Length: t.Length, Explicit: t.Explicit}
-    }
-    // Convert count fields safely
-    count := 0
-    if pl.Count.Valid {
-        count = int(pl.Count.Int32)
-    }
-    allowedCount := 0
-    if pl.AllowedCount.Valid {
-        allowedCount = int(pl.AllowedCount.Int32)
-    }
-    length := 0
-    // Return DTO (role and allowed ids are not relevant for group playlists)
-    return dto.Playlist{Id: pl.ID, Title: pl.Title, Thumbnail: pl.Thumbnail, Tracks: tracks, AllowedIds: pl.AllowedTracks, Count: count, Length: length, AllowedCount: allowedCount, Role: "", Type: string(pl.Type)}, nil
+	// Resolve track DTOs
+	tracks := make([]dto.Track, len(pl.Tracks))
+	for i, tid := range pl.Tracks {
+		t, err := tr.GetById(ctx, tid)
+		if err != nil {
+			return dto.Playlist{}, err
+		}
+		tracks[i] = dto.Track{Id: t.ID, Title: t.Title, Authors: t.Authors, Thumbnail: t.Thumbnail, Length: t.Length, Explicit: t.Explicit}
+	}
+	// Convert count fields safely
+	count := 0
+	if pl.Count.Valid {
+		count = int(pl.Count.Int32)
+	}
+	allowedCount := 0
+	if pl.AllowedCount.Valid {
+		allowedCount = int(pl.AllowedCount.Int32)
+	}
+	length := 0
+	// Return DTO (role and allowed ids are not relevant for group playlists)
+	return dto.Playlist{Id: pl.ID, Title: pl.Title, Thumbnail: pl.Thumbnail, Tracks: tracks, AllowedIds: pl.AllowedTracks, Count: count, Length: length, AllowedCount: allowedCount, Role: "", Type: string(pl.Type)}, nil
 }

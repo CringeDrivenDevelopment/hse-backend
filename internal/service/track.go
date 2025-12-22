@@ -95,8 +95,12 @@ func (s *TrackService) Approve(ctx context.Context, playlistId, trackId string, 
 
 	if err := s.trackRepo.Update(ctx, entity.EditPlaylistParams{
 		ID:            playlistId,
+		Title:         playlist.Title,
+		Thumbnail:     playlist.Thumbnail,
+		Tracks:        playlist.Tracks,
 		AllowedTracks: playlist.AllowedTracks,
 		Type:          playlist.Type,
+		TelegramID:    playlist.TelegramID,
 	}); err != nil {
 		return err
 	}
@@ -128,9 +132,13 @@ func (s *TrackService) Decline(ctx context.Context, playlistId, trackId string, 
 	}
 
 	if err := s.trackRepo.Update(ctx, entity.EditPlaylistParams{
-		ID:     playlistId,
-		Tracks: playlist.Tracks,
-		Type:   playlist.Type,
+		ID:            playlistId,
+		Title:         playlist.Title,
+		Thumbnail:     playlist.Thumbnail,
+		Tracks:        playlist.Tracks,
+		AllowedTracks: playlist.AllowedTracks,
+		Type:          playlist.Type,
+		TelegramID:    playlist.TelegramID,
 	}); err != nil {
 		return err
 	}
@@ -161,9 +169,12 @@ func (s *TrackService) Submit(ctx context.Context, playlistId, trackId string, u
 
 	if err := s.trackRepo.Update(ctx, entity.EditPlaylistParams{
 		ID:            playlistId,
-		Tracks:        tracks,
-		AllowedTracks: allowedTracks,
+		Title:         playlist.Title,
+		Thumbnail:     playlist.Thumbnail,
+		Tracks:        playlist.Tracks,
+		AllowedTracks: playlist.AllowedTracks,
 		Type:          playlist.Type,
+		TelegramID:    playlist.TelegramID,
 	}); err != nil {
 		return err
 	}
@@ -194,8 +205,12 @@ func (s *TrackService) Unapprove(ctx context.Context, playlistId, trackId string
 
 	if err := s.trackRepo.Update(ctx, entity.EditPlaylistParams{
 		ID:            playlistId,
+		Title:         playlist.Title,
+		Thumbnail:     playlist.Thumbnail,
+		Tracks:        playlist.Tracks,
 		AllowedTracks: playlist.AllowedTracks,
 		Type:          playlist.Type,
+		TelegramID:    playlist.TelegramID,
 	}); err != nil {
 		return err
 	}

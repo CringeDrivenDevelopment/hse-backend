@@ -156,13 +156,11 @@ func (s *TrackService) Submit(ctx context.Context, playlistId, trackId string, u
 		return err
 	}
 
-	tracks := playlist.Tracks
-	allowedTracks := playlist.AllowedTracks
-	if (playlist.Role == entity.PlaylistRoleOwner || playlist.Role == entity.PlaylistRoleModerator) && !slices.Contains(allowedTracks, trackId) {
-		tracks = append(tracks, trackId)
-		allowedTracks = append(allowedTracks, trackId)
-	} else if !slices.Contains(tracks, trackId) && playlist.Role == entity.PlaylistRoleViewer {
-		tracks = append(tracks, trackId)
+	if (playlist.Role == entity.PlaylistRoleOwner || playlist.Role == entity.PlaylistRoleModerator) && !slices.Contains(playlist.AllowedTracks, trackId) {
+		playlist.Tracks = append(playlist.Tracks, trackId)
+		playlist.AllowedTracks = append(playlist.AllowedTracks, trackId)
+	} else if !slices.Contains(playlist.Tracks, trackId) && playlist.Role == entity.PlaylistRoleViewer {
+		playlist.Tracks = append(playlist.Tracks, trackId)
 	} else {
 		return nil
 	}

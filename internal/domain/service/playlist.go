@@ -1,9 +1,9 @@
 package service
 
 import (
+	"backend/internal/api/dto"
 	"backend/internal/domain/entity"
 	"backend/internal/infra/repo"
-	"backend/internal/transport/api/dto"
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -15,6 +15,7 @@ type PlaylistService struct {
 	trackRepo    *repo.TrackRepo
 }
 
+// TODO: fix constructor
 func NewPlaylistService(pool *pgxpool.Pool, trackRepo *repo.TrackRepo) *PlaylistService {
 	return &PlaylistService{playlistRepo: repo.NewPlaylistRepo(pool), trackRepo: trackRepo}
 }

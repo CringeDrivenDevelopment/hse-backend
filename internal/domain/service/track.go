@@ -1,11 +1,10 @@
 package service
 
 import (
+	"backend/internal/api/dto"
 	"backend/internal/domain/entity"
 	"backend/internal/infra/repo"
 	"backend/internal/interfaces"
-	"backend/internal/transport/api/dto"
-	"backend/pkg/spotify"
 	"backend/pkg/utils"
 	"backend/pkg/youtube"
 	"context"
@@ -18,12 +17,11 @@ type TrackService struct {
 	trackRepo    *repo.TrackRepo
 	playlistRepo *repo.PlaylistRepo
 
-	youtube interfaces.SearchAPI
-	spotify interfaces.SearchAPI
+	youtube interfaces.MusicAPI
 }
 
-func NewTrackService(trackRepo *repo.TrackRepo, playlistRepo *repo.PlaylistRepo, ytApi *youtube.API, spotify *spotify.API) *TrackService {
-	return &TrackService{trackRepo: trackRepo, playlistRepo: playlistRepo, youtube: ytApi, spotify: spotify}
+func NewTrackService(trackRepo *repo.TrackRepo, playlistRepo *repo.PlaylistRepo, ytApi *youtube.API) *TrackService {
+	return &TrackService{trackRepo: trackRepo, playlistRepo: playlistRepo, youtube: ytApi}
 }
 
 /*
@@ -40,8 +38,6 @@ func (s *TrackService) Search(ctx context.Context, platform, query string) ([]dt
 	switch platform {
 	case string(entity.PlaylistTypeYoutube):
 		tracks, err = s.youtube.Search(ctx, query)
-	case string(entity.PlaylistTypeSpotify):
-		tracks, err = s.spotify.Search(ctx, query)
 	default:
 		err = utils.ErrUnknownPlatform
 	}

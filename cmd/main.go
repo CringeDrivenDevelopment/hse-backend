@@ -1,15 +1,15 @@
 package main
 
 import (
+	v1 "backend/internal/api/controllers/v1"
+	"backend/internal/api/middleware"
+	service2 "backend/internal/application/service"
 	"backend/internal/bot"
 	botHandlers "backend/internal/bot/handlers"
 	botService "backend/internal/bot/service"
+	"backend/internal/domain/service"
 	"backend/internal/infra"
 	"backend/internal/infra/repo"
-	"backend/internal/service"
-	"backend/internal/transport/api/handlers"
-	"backend/internal/transport/api/middlewares"
-	"backend/pkg/spotify"
 	"backend/pkg/youtube"
 	"fmt"
 	"os"
@@ -52,11 +52,11 @@ func main() {
 		}),
 		fx.Provide(
 			// REST API
-			middlewares.NewLogger,
-			middlewares.NewAuth,
-			handlers.NewAuth,
-			handlers.NewPlaylist,
-			handlers.NewTrack,
+			middleware.NewLogger,
+			middleware.NewAuth,
+			v1.NewAuth,
+			v1.NewPlaylist,
+			v1.NewTrack,
 
 			// bot
 			bot.NewBotClient,
@@ -83,21 +83,19 @@ func main() {
 
 			// external APIs
 			youtube.New,
-			spotify.New,
 
 			// service layer
-			service.NewAuthService,
+			service2.NewAuthService,
 			service.NewPermissionService,
 			service.NewPlaylistService,
 			service.NewTrackService,
 			service.NewUserService,
-			service.NewParticipantService,
 		),
 		// bot.Module,
 		fx.Invoke(func(
-			auth *handlers.Auth,
-			track *handlers.Track,
-			playlist *handlers.Playlist,
+			auth *v1.Auth,
+			track *v1.Track,
+			playlist *v1.Playlist,
 			client *gotgproto.Client,
 			groupHandler *botHandlers.GroupHandler,
 			chatActionHandler *botHandlers.ChatActionHandler,

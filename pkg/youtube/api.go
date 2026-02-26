@@ -1,7 +1,7 @@
 package youtube
 
 import (
-	"backend/internal/transport/api/dto"
+	"backend/internal/api/dto"
 	"bytes"
 	"compress/gzip"
 	"context"

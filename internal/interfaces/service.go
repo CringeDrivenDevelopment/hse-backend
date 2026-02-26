@@ -1,9 +1,9 @@
 package interfaces
 
 import (
+	apiDto "backend/internal/api/dto"
 	botDto "backend/internal/bot/dto"
 	"backend/internal/domain/entity"
-	apiDto "backend/internal/transport/api/dto"
 	"context"
 
 	"golang.org/x/oauth2"

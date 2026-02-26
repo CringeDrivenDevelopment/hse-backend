@@ -1,11 +1,11 @@
-package handlers
+package v1
 
 import (
+	"backend/internal/api/dto"
+	"backend/internal/api/middleware"
 	"backend/internal/domain/entity"
+	"backend/internal/domain/service"
 	"backend/internal/interfaces"
-	"backend/internal/service"
-	"backend/internal/transport/api/dto"
-	"backend/internal/transport/api/middlewares"
 	"backend/pkg/utils"
 	"context"
 	"fmt"
@@ -21,14 +21,14 @@ type Track struct {
 	logger *zap.Logger
 }
 
-func NewTrack(playlistService *service.PlaylistService, trackService *service.TrackService, logger *zap.Logger, api huma.API, authMiddleware *middlewares.Auth) *Track {
+func NewTrack(playlistService *service.PlaylistService, trackService *service.TrackService, logger *zap.Logger, api huma.API) *Track {
 	result := &Track{
 		playlistService: playlistService,
 		trackService:    trackService,
 		logger:          logger,
 	}
 
-	result.setup(api, authMiddleware.IsAuthenticated)
+	result.setup(api)
 
 	return result
 }
@@ -37,7 +37,7 @@ func NewTrack(playlistService *service.PlaylistService, trackService *service.Tr
 func (h *Track) search(ctx context.Context, input *struct {
 	Query string `query:"query"`
 }) (*dto.SearchResponse, error) {
-	val, ok := ctx.Value(middlewares.UserJwtKey).(int64)
+	val, ok := ctx.Value(middleware.UserContextKey).(int64)
 	if !ok {
 		err := utils.ErrContextUserNotFound
 
@@ -60,7 +60,7 @@ func (h *Track) search(ctx context.Context, input *struct {
 
 // submit - добавить трек в список на модерацию
 func (h *Track) submit(ctx context.Context, input *dto.TrackAction) (*struct{}, error) {
-	val, ok := ctx.Value(middlewares.UserJwtKey).(int64)
+	val, ok := ctx.Value(middleware.UserContextKey).(int64)
 	if !ok {
 		err := utils.ErrContextUserNotFound
 
@@ -80,7 +80,7 @@ func (h *Track) submit(ctx context.Context, input *dto.TrackAction) (*struct{}, 
 
 // decline - удалить трек из списка на модерацию
 func (h *Track) decline(ctx context.Context, input *dto.TrackAction) (*struct{}, error) {
-	val, ok := ctx.Value(middlewares.UserJwtKey).(int64)
+	val, ok := ctx.Value(middleware.UserContextKey).(int64)
 	if !ok {
 		err := utils.ErrContextUserNotFound
 
@@ -100,7 +100,7 @@ func (h *Track) decline(ctx context.Context, input *dto.TrackAction) (*struct{},
 
 // unapprove - удалить трек из списка разрешённых
 func (h *Track) unapprove(ctx context.Context, input *dto.TrackAction) (*struct{}, error) {
-	val, ok := ctx.Value(middlewares.UserJwtKey).(int64)
+	val, ok := ctx.Value(middleware.UserContextKey).(int64)
 	if !ok {
 		err := utils.ErrContextUserNotFound
 
@@ -120,7 +120,7 @@ func (h *Track) unapprove(ctx context.Context, input *dto.TrackAction) (*struct{
 
 // approve - добавить трек в список разрешённых
 func (h *Track) approve(ctx context.Context, input *dto.TrackAction) (*struct{}, error) {
-	val, ok := ctx.Value(middlewares.UserJwtKey).(int64)
+	val, ok := ctx.Value(middleware.UserContextKey).(int64)
 	if !ok {
 		err := utils.ErrContextUserNotFound
 

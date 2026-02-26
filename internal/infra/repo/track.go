@@ -1,8 +1,8 @@
 package repo
 
 import (
+	"backend/internal/api/dto"
 	"backend/internal/domain/entity"
-	"backend/internal/transport/api/dto"
 	"backend/pkg/utils"
 	"context"
 	"errors"

@@ -1,10 +1,9 @@
 package service
 
 import (
+	"backend/internal/api/dto"
 	"backend/internal/infra"
-	"backend/internal/transport/api/dto"
 	"backend/pkg/utils"
-	"encoding/base64"
 	"net/url"
 	"strconv"
 	"strings"
@@ -13,7 +12,6 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/golang-jwt/jwt/v5"
 	initdata "github.com/telegram-mini-apps/init-data-golang"
-	"golang.org/x/oauth2"
 )
 
 type AuthService struct {
@@ -105,21 +103,4 @@ func (s *AuthService) ParseTelegramData(initDataRaw string) (int64, error) {
 	}
 
 	return user.ID, nil
-}
-
-// ParseSpotifyData - извлечь данные для входа в Spotify из строки в base64
-// TODO: USE HTTP ONLY COOKIE!!!!!
-func (s *AuthService) ParseSpotifyData(spotifyAuthHeader string) (*oauth2.Token, error) {
-	decodedValue, err := base64.StdEncoding.DecodeString(spotifyAuthHeader)
-	if err != nil {
-		return nil, err
-	}
-
-	var token oauth2.Token
-	err = sonic.Unmarshal(decodedValue, &token)
-	if err != nil {
-		return nil, err
-	}
-
-	return &token, nil
 }

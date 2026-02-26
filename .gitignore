@@ -24,7 +24,11 @@
 # Go workspace file
 go.work
 
+cache/
 telegram/
+dumps/
+dl/
+tools/*.json
 .idea
 *.db
 *.env

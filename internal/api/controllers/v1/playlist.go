@@ -1,11 +1,10 @@
-package handlers
+package v1
 
 import (
-	"backend/internal/domain/entity"
+	"backend/internal/api/dto"
+	"backend/internal/api/middleware"
+	"backend/internal/domain/service"
 	"backend/internal/interfaces"
-	"backend/internal/service"
-	"backend/internal/transport/api/dto"
-	"backend/internal/transport/api/middlewares"
 	"backend/pkg/utils"
 	"context"
 	"fmt"
@@ -18,20 +17,19 @@ type Playlist struct {
 	authService       interfaces.AuthService
 	playlistService   interfaces.PlaylistService
 	permissionService interfaces.PermissionService
-	spotifyExportAPI  interfaces.SpotifyExportAPI
 
 	logger *zap.Logger
 }
 
 // NewPlaylist - создать новый экземпляр обработчика
-func NewPlaylist(playlistService *service.PlaylistService, permissionService *service.PermissionService, logger *zap.Logger, api huma.API, authMiddleware *middlewares.Auth) *Playlist {
+func NewPlaylist(playlistService *service.PlaylistService, permissionService *service.PermissionService, logger *zap.Logger, api huma.API) *Playlist {
 	result := &Playlist{
 		playlistService:   playlistService,
 		permissionService: permissionService,
 		logger:            logger,
 	}
 
-	result.setup(api, authMiddleware.IsAuthenticated)
+	result.setup(api)
 
 	return result
 }
@@ -40,7 +38,7 @@ func NewPlaylist(playlistService *service.PlaylistService, permissionService *se
 func (h *Playlist) getById(ctx context.Context, input *struct {
 	Id string `path:"id" minLength:"26" maxLength:"26" example:"01JZ35PYGP6HJA08H0NHYPBHWD" doc:"playlist id"`
 }) (*dto.PlaylistByIdResponse, error) {
-	val, ok := ctx.Value(middlewares.UserJwtKey).(int64)
+	val, ok := ctx.Value(middleware.UserContextKey).(int64)
 	if !ok {
 		err := utils.ErrContextUserNotFound
 
@@ -61,7 +59,7 @@ func (h *Playlist) getById(ctx context.Context, input *struct {
 
 // getAll - получить список плейлистов для пользователя
 func (h *Playlist) getAll(ctx context.Context, _ *struct{}) (*dto.PlaylistsResponse, error) {
-	val, ok := ctx.Value(middlewares.UserJwtKey).(int64)
+	val, ok := ctx.Value(middleware.UserContextKey).(int64)
 	if !ok {
 		err := utils.ErrContextUserNotFound
 
@@ -85,7 +83,7 @@ func (h *Playlist) export(ctx context.Context, input *struct {
 	IsPublic    bool   `query:"is_public" doc:"Set to true if the playlist is public. Works only with spotify"`
 	Id          string `path:"id" minLength:"26" maxLength:"26" example:"01JZ35PYGP6HJA08H0NHYPBHWD" doc:"playlist id"`
 }) (*struct{}, error) {
-	val, ok := ctx.Value(middlewares.UserJwtKey).(int64)
+	val, ok := ctx.Value(middleware.UserContextKey).(int64)
 	if !ok {
 		err := utils.ErrContextUserNotFound
 
@@ -103,24 +101,7 @@ func (h *Playlist) export(ctx context.Context, input *struct {
 	}
 
 	switch pl.Type {
-	case string(entity.PlaylistTypeSpotify):
-		// extract auth data, wtf, i can just use middleware for later, TODO: FIX THIS SHIT
-		tok, err := h.authService.ParseSpotifyData(input.SpotifyData)
-		if err != nil {
-			h.logger.Warn(fmt.Sprintf("export error: user_id - %d; error: %s", val, err.Error()))
-
-			return nil, utils.Convert(err, h.logger)
-		}
-
-		err = h.spotifyExportAPI.Export(ctx, tok, pl, input.IsPublic)
-		if err != nil {
-			h.logger.Warn(fmt.Sprintf("export error: user_id - %d; error: %s", val, err.Error()))
-
-			return nil, utils.Convert(err, h.logger)
-		}
 	default:
 		return nil, huma.Error400BadRequest("unsupported playlist type for export")
 	}
-
-	return nil, nil
 }

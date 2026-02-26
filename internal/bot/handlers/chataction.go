@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"backend/internal/service"
+	service2 "backend/internal/domain/service"
 	"context"
 	"errors"
 
@@ -15,20 +15,17 @@ import (
 )
 
 type ChatActionHandler struct {
-	playlistService    interfaces.PlaylistService
-	participantService interfaces.ParticipantService
-	logger             *zap.Logger
+	playlistService interfaces.PlaylistService
+	logger          *zap.Logger
 }
 
 func NewChatActionHandler(
-	playlistService *service.PlaylistService,
-	participantService *service.ParticipantService,
+	playlistService *service2.PlaylistService,
 	logger *zap.Logger,
 ) *ChatActionHandler {
 	return &ChatActionHandler{
-		playlistService:    playlistService,
-		participantService: participantService,
-		logger:             logger,
+		playlistService: playlistService,
+		logger:          logger,
 	}
 }
 

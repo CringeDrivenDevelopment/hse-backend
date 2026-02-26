@@ -4,8 +4,8 @@ import (
 	"backend/internal/bot/dto"
 	botService "backend/internal/bot/service"
 	"backend/internal/domain/entity"
+	service2 "backend/internal/domain/service"
 	"backend/internal/interfaces"
-	"backend/internal/service"
 	"context"
 	"errors"
 
@@ -26,8 +26,8 @@ type GroupHandler struct {
 }
 
 func NewGroupHandler(
-	playlistService *service.PlaylistService,
-	permissionService *service.PermissionService,
+	playlistService *service2.PlaylistService,
+	permissionService *service2.PermissionService,
 	chatService *botService.ChatService,
 	partService *botService.ParticipantService,
 	client *gotgproto.Client,

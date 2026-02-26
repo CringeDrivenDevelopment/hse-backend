@@ -1,9 +1,10 @@
-package handlers
+package v1
 
 import (
+	"backend/internal/api/dto"
+	"backend/internal/application/service"
+	service2 "backend/internal/domain/service"
 	"backend/internal/interfaces"
-	"backend/internal/service"
-	"backend/internal/transport/api/dto"
 	"backend/pkg/utils"
 	"context"
 	"errors"
@@ -22,7 +23,7 @@ type Auth struct {
 }
 
 // NewAuth - создать новый экземпляр обработчика
-func NewAuth(userService *service.UserService, authService *service.AuthService, logger *zap.Logger, api huma.API) *Auth {
+func NewAuth(userService *service2.UserService, authService *service.AuthService, logger *zap.Logger, api huma.API) *Auth {
 	result := &Auth{
 		userService: userService,
 		authService: authService,

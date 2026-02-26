@@ -60,23 +60,23 @@ func (h *ChatActionHandler) HandleChatAction(ctx *ext.Context, update *ext.Updat
 			h.logger.Error("failed to handle title update", zap.Error(err))
 		}
 	case *tg.MessageActionChatAddUser:
-		err = h.participantService.Add(ctx.Context, chatID, smResult.Users)
+		// err = h.participantService.Add(ctx.Context, chatID, smResult.Users)
 		// TODO: add more
 		if err != nil {
 			h.logger.Error("failed to handle add user", zap.Error(err))
 		}
 	case *tg.MessageActionChatDeleteUser:
-		err = h.participantService.Remove(ctx.Context, chatID, smResult.UserID)
+		// err = h.participantService.Remove(ctx.Context, chatID, smResult.UserID)
 		if err != nil {
 			h.logger.Error("failed to handle delete user", zap.Error(err))
 		}
 	case *tg.MessageActionChatJoinedByLink:
-		fromID, ok := serviceMessage.FromID.(*tg.PeerUser)
+		_, ok := serviceMessage.FromID.(*tg.PeerUser)
 		if !ok {
 			return errors.New("failed to handle joined by link")
 		}
 
-		err = h.participantService.Add(ctx.Context, chatID, []int64{fromID.UserID})
+		// err = h.participantService.Add(ctx.Context, chatID, []int64{fromID.UserID})
 		if err != nil {
 			h.logger.Error("failed to handle join by link user", zap.Error(err))
 		}

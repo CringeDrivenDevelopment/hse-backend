@@ -88,8 +88,8 @@ type FlexColumn struct {
 				NavigationEndpoint struct {
 					WatchEndpoint struct {
 						VideoId string `json:"videoId"`
-					} `json:"watchEndpoint,omitempty"`
-				} `json:"navigationEndpoint,omitempty"`
+					} `json:"watchEndpoint"`
+				} `json:"navigationEndpoint"`
 			} `json:"runs"`
 		} `json:"text"`
 	} `json:"musicResponsiveListItemFlexColumnRenderer"`

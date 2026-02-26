@@ -75,13 +75,13 @@ func parseTime(time string) (int, error) {
 }
 
 func getArtistsAndDuration(column FlexColumn) (string, int, error) {
-	data := ""
+	var data strings.Builder
 
 	for _, text := range column.Renderer.Data.Runs {
-		data += text.Text
+		data.WriteString(text.Text)
 	}
 
-	splitData := strings.Split(data, " • ")
+	splitData := strings.Split(data.String(), " • ")
 
 	duration, err := parseTime(splitData[len(splitData)-1])
 	if err != nil {

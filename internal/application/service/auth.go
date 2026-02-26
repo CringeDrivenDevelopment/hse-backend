@@ -37,7 +37,7 @@ func (s *AuthService) VerifyToken(authHeader string) (int64, error) {
 		return 0, utils.ErrInvalidToken
 	}
 
-	token, err := jwt.Parse(tokenStr, func(_ *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenStr, func(_ *jwt.Token) (any, error) {
 		return []byte(s.secret), nil
 	})
 

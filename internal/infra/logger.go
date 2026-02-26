@@ -71,6 +71,6 @@ func (a *ZapGooseAdapter) Printf(format string, args ...any) {
 	a.zap.Sugar().Infof(format, args...)
 }
 
-func (a *ZapGooseAdapter) Fatalf(format string, args ...interface{}) {
+func (a *ZapGooseAdapter) Fatalf(format string, args ...any) {
 	a.zap.Sugar().Fatalf(format, args...)
 }

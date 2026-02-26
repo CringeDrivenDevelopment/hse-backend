@@ -21,52 +21,50 @@ func NewPostgresConnection(lc fx.Lifecycle, logger *zap.Logger, cfg *Config) (*p
 		return nil, err
 	}
 
-	if lc != nil { // TODO: REMOVE
-		lc.Append(fx.Hook{
-			OnStart: func(ctx context.Context) error {
-				logger.Info("running migrations with db url: " + cfg.DbUrl)
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			logger.Info("running migrations with db url: " + cfg.DbUrl)
 
-				// configure pool
-				poolConfig := pool.Config()
-				poolConfig.MaxConns = 10
-				poolConfig.MinConns = 2
-				poolConfig.MaxConnLifetime = time.Hour
-				poolConfig.MaxConnIdleTime = time.Minute * 30
-				poolConfig.HealthCheckPeriod = time.Minute
+			// configure pool
+			poolConfig := pool.Config()
+			poolConfig.MaxConns = 10
+			poolConfig.MinConns = 2
+			poolConfig.MaxConnLifetime = time.Hour
+			poolConfig.MaxConnIdleTime = time.Minute * 30
+			poolConfig.HealthCheckPeriod = time.Minute
 
-				// check if online
-				if err := pool.Ping(ctx); err != nil {
-					return err
-				}
+			// check if online
+			if err := pool.Ping(ctx); err != nil {
+				return err
+			}
 
-				// run migrations
-				goose.SetBaseFS(projectroot.EmbedMigrations)
-				goose.SetLogger(&ZapGooseAdapter{zap: logger})
-				if err := goose.SetDialect("postgres"); err != nil {
-					return err
-				}
-				db := stdlib.OpenDBFromPool(pool)
-				if err := goose.Up(db, "sql/migrations"); err != nil {
-					return err
-				}
-				if err := db.Close(); err != nil {
-					return err
-				}
+			// run migrations
+			goose.SetBaseFS(projectroot.EmbedMigrations)
+			goose.SetLogger(&ZapGooseAdapter{zap: logger})
+			if err := goose.SetDialect("postgres"); err != nil {
+				return err
+			}
+			db := stdlib.OpenDBFromPool(pool)
+			if err := goose.Up(db, "sql/migrations"); err != nil {
+				return err
+			}
+			if err := db.Close(); err != nil {
+				return err
+			}
 
-				logger.Info("migrations applied")
+			logger.Info("migrations applied")
 
-				return nil
-			},
-			OnStop: func(ctx context.Context) error {
-				pool.Close()
-				cancel()
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			pool.Close()
+			cancel()
 
-				logger.Info("db connection closed")
+			logger.Info("db connection closed")
 
-				return nil
-			},
-		})
-	}
+			return nil
+		},
+	})
 
 	return pool, nil
 }

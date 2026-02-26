@@ -5,8 +5,6 @@ import (
 	botDto "backend/internal/bot/dto"
 	"backend/internal/domain/entity"
 	"context"
-
-	"golang.org/x/oauth2"
 )
 
 type UserService interface {
@@ -18,7 +16,6 @@ type AuthService interface {
 	VerifyToken(authHeader string) (int64, error)
 	GenerateToken(userID int64) (string, error)
 	ParseTelegramData(initDataRaw string) (int64, error)
-	ParseSpotifyData(spotifyAuthHeader string) (*oauth2.Token, error)
 }
 
 type PlaylistService interface {

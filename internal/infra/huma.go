@@ -1,11 +1,11 @@
 package infra
 
 import (
+	"backend/pkg/humaecho"
 	"io"
 
 	"github.com/bytedance/sonic"
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/danielgtaylor/huma/v2/adapters/humaecho"
 	"github.com/labstack/echo/v5"
 )
 

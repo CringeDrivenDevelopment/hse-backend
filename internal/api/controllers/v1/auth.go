@@ -2,7 +2,6 @@ package v1
 
 import (
 	"backend/internal/api/dto"
-	"backend/internal/application/service"
 	service2 "backend/internal/domain/service"
 	"backend/internal/interfaces"
 	"backend/pkg/utils"
@@ -23,7 +22,7 @@ type Auth struct {
 }
 
 // NewAuth - создать новый экземпляр обработчика
-func NewAuth(userService *service2.UserService, authService *service.AuthService, logger *zap.Logger, api huma.API) *Auth {
+func NewAuth(userService *service2.UserService, authService interfaces.AuthService, logger *zap.Logger, api huma.API) *Auth {
 	result := &Auth{
 		userService: userService,
 		authService: authService,

@@ -1,5 +1,5 @@
 # Base image with go compiler
-FROM golang:1.25.4 AS build
+FROM golang:1.26 AS build
 
 # Go to working dir
 WORKDIR /src

@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"backend/internal/application/service"
 	"backend/internal/interfaces"
 	"context"
 	"net/http"
@@ -19,7 +18,7 @@ type Auth struct {
 
 const UserContextKey = "user"
 
-func NewAuth(authService *service.AuthService, logger *zap.Logger) *Auth {
+func NewAuth(authService interfaces.AuthService, logger *zap.Logger) *Auth {
 
 	return &Auth{
 		authService: authService,

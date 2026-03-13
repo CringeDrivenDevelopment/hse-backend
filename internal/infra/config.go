@@ -23,8 +23,7 @@ type Config struct {
 	AppId     int    `env:"APP_ID"`
 	BotToken  string `env:"BOT_TOKEN"`
 
-	SpotifyId     string `env:"SPOTIFY_ID"`
-	SpotifySecret string `env:"SPOTIFY_SECRET"`
+	HttpProxy string `env:"HTTP_PROXY"`
 
 	Debug bool `env:"DEBUG" env-default:"false"`
 }
@@ -51,14 +50,6 @@ func NewConfig() (*Config, error) {
 
 	if cfg.BotToken == "" {
 		return nil, errors.New("BOT_TOKEN is REQUIRED not to be null")
-	}
-
-	if cfg.SpotifyId == "" {
-		return nil, errors.New("SPOTIFY_ID is REQUIRED not to be null")
-	}
-
-	if cfg.SpotifySecret == "" {
-		return nil, errors.New("SPOTIFY_SECRET is REQUIRED not to be null")
 	}
 
 	return &cfg, nil

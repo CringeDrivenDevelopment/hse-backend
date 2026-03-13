@@ -2,6 +2,7 @@ package youtube
 
 import (
 	"backend/internal/api/dto"
+	"backend/internal/infra"
 	"bytes"
 	"compress/gzip"
 	"context"
@@ -9,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/andybalholm/brotli"
@@ -20,8 +22,20 @@ type API struct {
 	client *http.Client
 }
 
-func New() *API {
-	return &API{client: &http.Client{}}
+func New(cfg *infra.Config) (*API, error) {
+	client := &http.Client{}
+
+	if cfg.HttpProxy != "" {
+		proxyUrl, err := url.Parse(cfg.HttpProxy)
+		if err != nil {
+			return nil, fmt.Errorf("invalid http proxy url: %w", err)
+		}
+		client.Transport = &http.Transport{
+			Proxy: http.ProxyURL(proxyUrl),
+		}
+	}
+
+	return &API{client: client}, nil
 }
 
 func (s *API) Search(ctx context.Context, query string) ([]dto.Track, error) {

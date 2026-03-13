@@ -3,7 +3,10 @@ package main
 import (
 	v1 "backend/internal/api/controllers/v1"
 	"backend/internal/api/middleware"
-	service2 "backend/internal/application/service"
+	appService "backend/internal/application/service"
+	"backend/internal/bot"
+	botHandlers "backend/internal/bot/handlers"
+	botService "backend/internal/bot/service"
 	"backend/internal/domain/service"
 	"backend/internal/infra"
 	"backend/internal/infra/repo"
@@ -13,6 +16,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/celestix/gotgproto"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
@@ -56,16 +60,16 @@ func main() {
 			v1.NewTrack,
 
 			// bot
-			// bot.NewBotClient,
+			bot.NewBotClient,
 
 			// bot handlers
-			// botHandlers.NewStartHandler,
-			// botHandlers.NewChatActionHandler,
-			// botHandlers.NewGroupHandler,
+			botHandlers.NewStartHandler,
+			botHandlers.NewChatActionHandler,
+			botHandlers.NewGroupHandler,
 
 			// bot services
-			// botService.NewParticipantService,
-			// botService.NewChatService,
+			botService.NewParticipantService,
+			botService.NewChatService,
 
 			// infra
 			infra.NewEcho,
@@ -82,7 +86,7 @@ func main() {
 			youtube.New,
 
 			// service layer
-			fx.Annotate(service2.NewAuthService, fx.As(new(interfaces.AuthService))),
+			fx.Annotate(appService.NewAuthService, fx.As(new(interfaces.AuthService))),
 			service.NewPermissionService,
 			service.NewPlaylistService,
 			service.NewTrackService,
@@ -92,11 +96,11 @@ func main() {
 		fx.Invoke(func(
 			auth *v1.Auth,
 			track *v1.Track,
-			playlist *v1.Playlist) {
-			// client *gotgproto.Client,
-			// groupHandler *botHandlers.GroupHandler,
-			// chatActionHandler *botHandlers.ChatActionHandler,
-			// startHandler *botHandlers.StartHandler) {
+			playlist *v1.Playlist,
+			client *gotgproto.Client,
+			groupHandler *botHandlers.GroupHandler,
+			chatActionHandler *botHandlers.ChatActionHandler,
+			startHandler *botHandlers.StartHandler) {
 			// need each of controllers, to register them
 
 			// no need to call infra, apis and services, they're deps, started automatically
